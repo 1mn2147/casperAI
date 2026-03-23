@@ -1,6 +1,7 @@
 import os
 import shutil
 import json
+from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Query
 from fastapi.staticfiles import StaticFiles
@@ -12,38 +13,44 @@ from .llm import parse_command, summarize_minutes
 from .calendar_api import get_upcoming_events, add_event
 from .database import save_minutes, update_minutes, get_latest_minutes, get_minutes_by_id
 
+BACKEND_DIR = Path(__file__).resolve().parent
+SCREENS_DIR = BACKEND_DIR.parent / "frontend" / "src" / "screens"
+TMP_DIR = BACKEND_DIR / "tmp"
+TMP_DIR.mkdir(exist_ok=True)
+
 app = FastAPI(title="CasperAI Backend")
 
-app.mount("/static", StaticFiles(directory="frontend/src/screens"), name="static")
+app.mount("/static", StaticFiles(directory=str(SCREENS_DIR)), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
-    with open("frontend/src/screens/dashboard_overview.html", "r", encoding="utf-8") as f:
+    with (SCREENS_DIR / "dashboard_overview.html").open("r", encoding="utf-8") as f:
         return f.read()
 
 @app.get("/calendar", response_class=HTMLResponse)
 def get_calendar_view():
-    with open("frontend/src/screens/calendar_management.html", "r", encoding="utf-8") as f:
+    with (SCREENS_DIR / "calendar_management.html").open("r", encoding="utf-8") as f:
         return f.read()
 
 @app.get("/minutes", response_class=HTMLResponse)
 def get_minutes_view():
-    with open("frontend/src/screens/meeting_minutes.html", "r", encoding="utf-8") as f:
+    with (SCREENS_DIR / "meeting_minutes.html").open("r", encoding="utf-8") as f:
         return f.read()
 
 @app.get("/command", response_class=HTMLResponse)
 def get_command_view():
-    with open("frontend/src/screens/voice_ai_command_center.html", "r", encoding="utf-8") as f:
+    with (SCREENS_DIR / "voice_ai_command_center.html").open("r", encoding="utf-8") as f:
         return f.read()
 
 @app.post("/api/voice-command")
 async def handle_voice_command(audio: UploadFile = File(...)):
-    temp_path = f"temp_{audio.filename}"
-    with open(temp_path, "wb") as buffer:
+    safe_filename = Path(audio.filename or "command.webm").name
+    temp_path = TMP_DIR / f"temp_{safe_filename}"
+    with temp_path.open("wb") as buffer:
         shutil.copyfileobj(audio.file, buffer)
     
     try:
-        transcript = transcribe_audio(temp_path)
+        transcript = transcribe_audio(str(temp_path))
         parsed = parse_command(transcript)
         intent = parsed.get("intent")
         
@@ -69,25 +76,26 @@ async def handle_voice_command(audio: UploadFile = File(...)):
         elif intent == "general_query":
             reply_text = parsed.get("reply", "네, 알겠습니다.")
             
-        tts_output = f"response_{audio.filename}.mp3"
-        synthesize_speech(reply_text, tts_output)
+        tts_filename = f"response_{safe_filename}.mp3"
+        tts_output_path = TMP_DIR / tts_filename
+        synthesize_speech(reply_text, str(tts_output_path))
         
         return {
             "status": "success",
             "transcript": transcript,
             "intent": parsed,
             "reply": reply_text,
-            "audio_response_url": f"/api/audio/{tts_output}"
+            "audio_response_url": f"/api/audio/{tts_filename}"
         }
     except Exception as e:
         return {"status": "error", "message": str(e)}
     finally:
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
+        if temp_path.exists():
+            temp_path.unlink()
 
 @app.get("/api/audio/{filename}")
 def get_audio_response(filename: str):
-    return FileResponse(filename)
+    return FileResponse(TMP_DIR / Path(filename).name)
 
 @app.get("/api/events")
 def fetch_events():

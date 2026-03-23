@@ -1,8 +1,8 @@
 import sqlite3
 import datetime
-import os
+from pathlib import Path
 
-DB_PATH = "casper_data.db"
+DB_PATH = Path(__file__).resolve().parent / "casper_data.db"
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
