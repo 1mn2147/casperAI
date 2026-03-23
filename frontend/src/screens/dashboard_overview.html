@@ -281,15 +281,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!res.ok) throw new Error('Failed to fetch events');
                 return res.json();
             })
-            .then(events => {
-                if (events && events.length > 0) {
+            .then(data => {
+                if (data.status === 'success' && data.events && data.events.length > 0) {
                     activitiesList.innerHTML = '';
-                    events.forEach((event, index) => {
-                        const dateObj = new Date(event.start_time);
+                    data.events.forEach((event, index) => {
+                        const startTime = event.start?.dateTime || event.start?.date;
+                        const endTime = event.end?.dateTime || event.end?.date;
+                        const dateObj = new Date(startTime);
                         const month = dateObj.toLocaleString('default', { month: 'short' }).toUpperCase();
                         const day = dateObj.getDate();
-                        const timeString = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        const endStr = event.end_time ? ` - ${new Date(event.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : '';
+                        const isAllDay = !event.start?.dateTime;
+                        const timeString = isAllDay
+                            ? 'All day'
+                            : dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        const endStr = endTime && !isAllDay
+                            ? ` - ${new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                            : '';
                         
                         const isPrimary = index % 2 === 0;
                         const iconBgClass = isPrimary ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-highest text-on-surface-variant';

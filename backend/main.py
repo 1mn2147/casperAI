@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from .stt_tts import transcribe_audio, synthesize_speech
 from .llm import parse_command, summarize_minutes
 from .calendar_api import get_upcoming_events, add_event
-from .database import save_minutes, get_latest_minutes, get_minutes_by_id
+from .database import save_minutes, update_minutes, get_latest_minutes, get_minutes_by_id
 
 app = FastAPI(title="CasperAI Backend")
 
@@ -55,8 +55,11 @@ async def handle_voice_command(audio: UploadFile = File(...)):
                 desc = parsed.get("description", "")
                 start = parsed.get("start_time")
                 end = parsed.get("end_time")
-                add_event(summary, desc, start, end)
-                reply_text = f"구글 캘린더에 {summary} 일정을 추가했습니다."
+                if isinstance(start, str) and isinstance(end, str):
+                    add_event(summary, desc, start, end)
+                    reply_text = f"구글 캘린더에 {summary} 일정을 추가했습니다."
+                else:
+                    reply_text = "일정 시간 정보를 정확히 이해하지 못했습니다. 다시 말씀해 주세요."
             except Exception as e:
                 reply_text = f"일정 추가 중 오류가 발생했습니다: {str(e)}"
                 
@@ -96,14 +99,27 @@ def fetch_events():
 
 class MinutesRequest(BaseModel):
     transcript: str
-    title: Optional[str] = "새로운 회의록"
+    title: Optional[str] = None
+    id: Optional[int] = None
 
 @app.post("/api/summarize")
 def generate_minutes(req: MinutesRequest):
     try:
         summary = summarize_minutes(req.transcript)
-        # DB에 저장
-        min_id = save_minutes(req.title, req.transcript, summary)
+
+        if req.id is not None:
+            existing_minute = get_minutes_by_id(req.id)
+            if not existing_minute:
+                return {"status": "error", "message": "Not found"}
+
+            title = req.title or existing_minute.get("title") or "새로운 회의록"
+            updated = update_minutes(req.id, title, req.transcript, summary)
+            if not updated:
+                return {"status": "error", "message": "Not found"}
+            min_id = req.id
+        else:
+            title = req.title or "새로운 회의록"
+            min_id = save_minutes(title, req.transcript, summary)
         return {"status": "success", "summary": summary, "id": min_id}
     except Exception as e:
         return {"status": "error", "message": str(e)}

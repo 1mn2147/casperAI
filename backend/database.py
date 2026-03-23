@@ -32,6 +32,19 @@ def save_minutes(title: str, transcript: str, summary: str):
     conn.close()
     return inserted_id
 
+def update_minutes(min_id: int, title: str, transcript: str, summary: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE meeting_minutes
+        SET title = ?, transcript = ?, summary = ?
+        WHERE id = ?
+    ''', (title, transcript, summary, min_id))
+    conn.commit()
+    updated = cursor.rowcount > 0
+    conn.close()
+    return updated
+
 def get_latest_minutes(limit: int = 5):
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row

@@ -267,11 +267,14 @@
                 const response = await fetch(`/api/minutes/${currentId}`);
                 if (response.ok) {
                     const data = await response.json();
-                    if (minuteTitle) minuteTitle.innerText = data.title || "Untitled Minute";
-                    if (minuteDate) minuteDate.innerHTML = `<span class="material-symbols-outlined text-sm" data-icon="event">event</span> ${data.date || new Date().toLocaleDateString()}`;
-                    if (transcriptInput) transcriptInput.value = data.transcript || "";
-                    if (summaryOutput && data.summary) {
-                        summaryOutput.innerHTML = `<p class="text-lg first-letter:text-5xl first-letter:font-headline first-letter:mr-3 first-letter:float-left first-letter:text-primary font-body">${data.summary}</p>`;
+                    const minute = data.status === "success" ? data.minute : null;
+                    if (minuteTitle) minuteTitle.innerText = minute?.title || "Untitled Minute";
+                    if (minuteDate) minuteDate.innerHTML = `<span class="material-symbols-outlined text-sm" data-icon="event">event</span> ${minute?.created_at ? new Date(minute.created_at).toLocaleDateString() : new Date().toLocaleDateString()}`;
+                    if (transcriptInput) transcriptInput.value = minute?.transcript || "";
+                    if (summaryOutput && minute?.summary) {
+                        summaryOutput.innerHTML = `<p class="text-lg first-letter:text-5xl first-letter:font-headline first-letter:mr-3 first-letter:float-left first-letter:text-primary font-body">${minute.summary}</p>`;
+                    } else if (summaryOutput) {
+                        summaryOutput.innerHTML = `<p class="text-lg font-body text-on-surface-variant/50">No summary available.</p>`;
                     }
                 } else {
                     if (minuteTitle) minuteTitle.innerText = "Meeting Not Found";
