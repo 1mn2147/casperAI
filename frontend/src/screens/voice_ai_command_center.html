@@ -164,7 +164,7 @@
 <span class="material-symbols-outlined text-4xl text-primary" data-icon="person_pin">person_pin</span>
 </div>
 <span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant/70 mb-4 block">User Command</span>
-<p class="font-body text-xl text-on-background leading-relaxed italic">
+<p id="userCommandText" class="font-body text-xl text-on-background leading-relaxed italic">
                         "Review the minutes from yesterday's executive session and summarize the key action points regarding the new market expansion."
                     </p>
 </div>
@@ -230,11 +230,11 @@
 <button class="w-12 h-12 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
 <span class="material-symbols-outlined" data-icon="keyboard">keyboard</span>
 </button>
-<div class="flex-1 px-4 font-body text-on-surface-variant/80 italic text-sm">
+<div id="statusText" class="flex-1 px-4 font-body text-on-surface-variant/80 italic text-sm">
                 Listening for command...
             </div>
 <div class="flex items-center gap-1">
-<div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white shadow-lg cursor-pointer hover:scale-105 active:scale-95 transition-transform">
+<div id="micBtn" class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white shadow-lg cursor-pointer hover:scale-105 active:scale-95 transition-transform">
 <span class="material-symbols-outlined" data-icon="mic" data-weight="fill">mic</span>
 </div>
 </div>
@@ -245,4 +245,83 @@
 <div class="fixed inset-0 pointer-events-none opacity-[0.05] mix-blend-multiply">
 <img class="w-full h-full object-cover" data-alt="Subtle noise and paper texture overlay" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC75YZg3mzHB3iNC_EeIgqEd2GG2fteIf-VM3ttGxle5ldpvnk_F5DBzR0-08qPzEJjzLpVkBDGW_aidI_FqlCmY8GEbyAy9CfqoDyJqfTCx56jdto0ofrySPcz35f7kZ4Gq-x81JEpdkIEyiK9Z_14FBNzHfSi05_FnzG6AuwgBzq3Eenfag9fToERDwnJ2469LdaZg2tH9b40zN-Bqid8DIZOqUNn2PEDd1718czj5iel6lfO5_gCRePWfgm2orcH3d64HUfRRew"/>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const micBtn = document.getElementById('micBtn');
+        const statusText = document.getElementById('statusText');
+        const userCommandText = document.getElementById('userCommandText');
+
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        if (micBtn) {
+            micBtn.addEventListener('click', async () => {
+                if (!isRecording) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mediaRecorder = new MediaRecorder(stream);
+                        audioChunks = [];
+
+                        mediaRecorder.ondataavailable = event => {
+                            if (event.data.size > 0) {
+                                audioChunks.push(event.data);
+                            }
+                        };
+
+                        mediaRecorder.onstop = async () => {
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                            const formData = new FormData();
+                            formData.append('audio', audioBlob, 'command.webm');
+
+                            statusText.innerText = 'Processing command...';
+
+                            try {
+                                const response = await fetch('/api/voice-command', {
+                                    method: 'POST',
+                                    body: formData
+                                });
+
+                                if (response.ok) {
+                                    const data = await response.json();
+                                    if (data.transcript && userCommandText) {
+                                        userCommandText.innerText = `"${data.transcript}"`;
+                                    }
+                                    if (data.audio_response_url) {
+                                        const audio = new Audio(data.audio_response_url);
+                                        audio.play();
+                                    }
+                                    statusText.innerText = 'Listening for command...';
+                                } else {
+                                    throw new Error('Server returned an error.');
+                                }
+                            } catch (error) {
+                                console.error('Error sending audio:', error);
+                                alert('Failed to process command. Please check console.');
+                                statusText.innerText = 'Listening for command...';
+                            }
+                        };
+
+                        mediaRecorder.start();
+                        isRecording = true;
+                        statusText.innerText = 'Recording... (Tap mic to stop)';
+                        micBtn.classList.remove('bg-primary');
+                        micBtn.classList.add('bg-error');
+                    } catch (error) {
+                        console.error('Microphone access denied:', error);
+                        alert('Could not access microphone.');
+                    }
+                } else {
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    isRecording = false;
+                    micBtn.classList.remove('bg-error');
+                    micBtn.classList.add('bg-primary');
+                    statusText.innerText = 'Uploading...';
+                }
+            });
+        }
+    });
+</script>
 </body></html>

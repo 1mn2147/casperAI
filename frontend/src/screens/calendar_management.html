@@ -325,7 +325,7 @@
 <h4 class="font-headline text-lg text-primary font-bold">Upcoming</h4>
 <button class="text-xs text-primary font-bold hover:underline">View All</button>
 </div>
-<div class="space-y-6">
+<div class="space-y-6" id="eventList">
 <!-- Event Item -->
 <div class="group relative pl-4">
 <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary group-hover:w-2 transition-all"></div>
@@ -369,4 +369,65 @@
 </div>
 </section>
 </main>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const eventList = document.getElementById("eventList");
+    
+    fetch("/api/events")
+      .then(response => {
+        if (!response.ok) throw new Error("Failed to fetch events");
+        return response.json();
+      })
+      .then(data => {
+        if (data.status === "success" && data.events) {
+          eventList.innerHTML = "";
+          if (data.events.length === 0) {
+            eventList.innerHTML = `<p class="text-sm text-on-surface-variant font-label">No upcoming events.</p>`;
+            return;
+          }
+          
+          data.events.forEach((event, index) => {
+            const colors = ['primary', 'secondary', 'tertiary'];
+            const color = colors[index % colors.length];
+            
+            const dtString = event.start?.dateTime || event.start?.date || new Date().toISOString();
+            const dateObj = new Date(dtString);
+            
+            const monthOpts = { month: 'short', day: 'numeric' };
+            const timeOpts = { hour: 'numeric', minute: '2-digit' };
+            
+            const isAllDay = !event.start?.dateTime;
+            let formattedDate = dateObj.toLocaleDateString(undefined, monthOpts);
+            if (!isAllDay) {
+                formattedDate += " · " + dateObj.toLocaleTimeString(undefined, timeOpts);
+            }
+            
+            const locationText = event.location || "Google Meet / No location";
+            const icon = event.location ? "location_on" : "videocam";
+            const title = event.summary || "Untitled Event";
+            
+            const eventHtml = `
+              <div class="group relative pl-4">
+                <div class="absolute left-0 top-0 bottom-0 w-1 bg-${color} opacity-60 group-hover:opacity-100 group-hover:w-2 transition-all"></div>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-${color} mb-1">${formattedDate}</p>
+                <h5 class="font-headline text-md leading-tight text-on-surface font-bold mb-2">${title}</h5>
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="${icon}">${icon}</span>
+                  <span class="text-xs text-on-surface-variant font-label">${locationText}</span>
+                </div>
+              </div>
+            `;
+            
+            eventList.insertAdjacentHTML("beforeend", eventHtml);
+          });
+        } else {
+          eventList.innerHTML = `<p class="text-sm text-error font-label">Error loading events data.</p>`;
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching events:", error);
+        eventList.innerHTML = `<p class="text-sm text-error font-label">Failed to connect to server.</p>`;
+      });
+  });
+</script>
 </body></html>

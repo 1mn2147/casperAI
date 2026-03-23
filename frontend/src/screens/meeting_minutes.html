@@ -182,7 +182,7 @@
 <h4 class="font-headline text-3xl font-bold text-on-background">AI Summary</h4>
 <span class="material-symbols-outlined text-primary" data-icon="auto_awesome">auto_awesome</span>
 </div>
-<div class="prose prose-stone max-w-none space-y-6 text-on-surface-variant leading-relaxed">
+<div id="summaryOutput" class="prose prose-stone max-w-none space-y-6 text-on-surface-variant leading-relaxed">
 <p class="text-lg first-letter:text-5xl first-letter:font-headline first-letter:mr-3 first-letter:float-left first-letter:text-primary font-body">The meeting focused on resolving the bottlenecks in Phase II deployment, specifically targeting the latent issues within the primary database shards. Marcus provided a comprehensive overview of the current lag times, which have spiked since the Tuesday rollout.</p>
 <div class="bg-primary/5 p-6 border-l-4 border-primary/40 italic font-headline text-xl text-on-surface/90 rounded-r-lg">
                     "If we don't address the caching layer by Friday, the weekend traffic will likely cause a full service interruption." — Marcus Thorne
@@ -235,66 +235,73 @@
 <section class="col-span-12 bg-surface-container-high p-10 rounded-xl space-y-8 border border-outline-variant/20 shadow-sm">
 <div class="flex justify-between items-center border-b border-outline-variant/30 pb-6">
 <h4 class="font-headline text-3xl font-bold text-on-background">Full Transcript</h4>
-<div class="flex gap-2">
-<div class="bg-surface px-4 py-2 rounded flex items-center gap-3 text-sm border border-outline-variant/20">
+<div class="flex gap-4">
+<button id="summarizeBtn" class="bg-primary px-6 py-2 rounded-lg text-sm text-on-primary font-bold hover:bg-primary/90 transition-all">Summarize</button>
+<div class="bg-surface px-4 py-2 rounded-lg flex items-center gap-3 text-sm border border-outline-variant/20">
 <span class="material-symbols-outlined text-sm text-on-surface-variant/60" data-icon="search">search</span>
 <span class="text-on-surface-variant/60 font-medium">Search transcript...</span>
 </div>
 </div>
 </div>
 <div class="space-y-10 max-h-[600px] overflow-y-auto pr-6 custom-scrollbar">
-<div class="flex gap-6">
-<div class="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20 bg-primary-container">
-<img alt="Marcus Thorne" class="w-full h-full object-cover" data-alt="Portrait of a professional man Marcus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcnTnOAaTxMjQkRR6cXti6B0bbDRXsbXtOJxMGtkAnEbphXdavG0rUVPnjoDzBcqGe_V2eErPdve8RDBzf4Y1avBgFlMSj192QCYPTa4KEDfvOVPyCpQuxhd5JlMsHzdVY-Wu9GLPM3arS1qQQyqcrj5BpBDoMeewstHkNvjtqCqhWs-NPLTqefPeqOyhy9lI-Z2NIO7o9gdr763An7PeqyFbLAjBUTE9DrpM7eY1CoL2yQiQcsPU-lT9WNvyqW_lLRLMhk5jpFmo"/>
-</div>
-<div class="space-y-2">
-<div class="flex items-center gap-3">
-<span class="font-bold text-primary">Marcus Thorne</span>
-<span class="text-xs text-on-surface-variant/60 font-bold">00:02</span>
-</div>
-<p class="text-on-surface/90 leading-relaxed font-medium">Morning everyone. Let's dive straight in. I’ve been looking at the latency metrics from the overnight batch processing. The Phoenix shards are struggling with the increased write operations.</p>
-</div>
-</div>
-<div class="flex gap-6">
-<div class="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20 bg-secondary-container">
-<img alt="Elena Vasquez" class="w-full h-full object-cover" data-alt="Portrait of a professional woman Elena" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjwTQdtvwjRYQshLj_0f1d8O0vdbYVaxtaDoMfWqUIg0MWViWTxWYTewOQRFc9kyRs6IkGms-3WCHGTJwoRJ_n6t9Ii4yzzPkHKSJQN4wOsQn8TC5q8zGl0h7PJwhnZmmonBbRR_tWLAco_pH2KF1U-H8GgEp3o9FEjVjdcd5zR-F0DSlQjr7dW4ePrz6c6zN4pDpfEPNkZiTVKLgBOTKbkuYKmmh6GZ5E9ZfNAdZoCqK1mQAwW-MLLgDDugek4ZTsVPwKgyi6faA"/>
-</div>
-<div class="space-y-2">
-<div class="flex items-center gap-3">
-<span class="font-bold text-primary">Elena Vasquez</span>
-<span class="text-xs text-on-surface-variant/60 font-bold">00:45</span>
-</div>
-<p class="text-on-surface/90 leading-relaxed font-medium">I noticed that too. Is that a limitation of the current hardware or is it the indexing strategy we implemented last week?</p>
-</div>
-</div>
-<div class="flex gap-6">
-<div class="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20 bg-primary-container">
-<img alt="Marcus Thorne" class="w-full h-full object-cover" data-alt="Portrait of a professional man Marcus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgcGSiXrbt3OBvUdyAXfEn6Cj2-pXJ4ciU15a6e-sKIdfitUaolygDRhfFF5m-wUbF8nCpiUZNbucNZglqWAS8HedXdX-nX1XABayJNiCF8rGJV4zqKstvP9RFzFcx3T1n1NndmRgvvNVftLmKLAtka9h-TjCcN9fQHhf3hD1NdkqUSOIciNy8Z54w8px5ytayiq0tT9Q89s54DMES7xKRBQb-qffz5SUS4qrUcAo8FOz1HDvCmrVAEsazsV4COqqL7P8YDxiMaPE"/>
-</div>
-<div class="space-y-2">
-<div class="flex items-center gap-3">
-<span class="font-bold text-primary">Marcus Thorne</span>
-<span class="text-xs text-on-surface-variant/60 font-bold">01:12</span>
-</div>
-<p class="text-on-surface/90 leading-relaxed font-medium">Likely both. The indices are heavy, but the hardware is definitely redlining. We need to look at either offloading the read-load to replicas or moving to the distributed node structure we discussed in Q2.</p>
-</div>
-</div>
-<div class="flex gap-6">
-<div class="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20 bg-tertiary-container">
-<img alt="Sarah Lin" class="w-full h-full object-cover" data-alt="Portrait of a professional woman Sarah" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgfais9ODqc7z6qlw4_8zp6TDfjhBXWdD_l_z4wCvpD89B1s46Nri7v9o965eSVoIgFVOxDIC2AdqAHMS0S2BhWxuDfvw6g60kPg0SSszoS6mmvo1iGJTTMDD07VrsGC0iSdYOwF-WaYuZ2HhBYP04U6uDxJKSdzdSte8t2aH-WMVepwwEVZDILACg8B4TCnc2V1P3xShCJk5nlTwSxrggENs9NOZqUkXq2cpUgB0vqmTA96ROPZlpJi3lIX9q9rAr7pB7mPN7lYM"/>
-</div>
-<div class="space-y-2">
-<div class="flex items-center gap-3">
-<span class="font-bold text-primary">Sarah Lin</span>
-<span class="text-xs text-on-surface-variant/60 font-bold">02:30</span>
-</div>
-<p class="text-on-surface/90 leading-relaxed font-medium">From the client side, the lag is starting to become noticeable during peak hours. If we don't address the caching layer by Friday, the weekend traffic will likely cause a full service interruption. We need a temporary fix before we commit to a full migration.</p>
-</div>
-</div>
+<textarea id="transcriptInput" class="w-full h-full min-h-[400px] bg-transparent border-none focus:ring-0 text-on-surface/90 text-lg leading-relaxed font-medium resize-none placeholder-on-surface-variant/50" placeholder="Paste your meeting transcript here..."></textarea>
 </div>
 </section>
 </div>
 <!-- Footer Spacer -->
 <div class="h-16"></div>
 </main>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const summarizeBtn = document.getElementById("summarizeBtn");
+        const transcriptInput = document.getElementById("transcriptInput");
+        const summaryOutput = document.getElementById("summaryOutput");
+
+        if (summarizeBtn && transcriptInput && summaryOutput) {
+            summarizeBtn.addEventListener("click", async () => {
+                const transcript = transcriptInput.value.trim();
+                if (!transcript) {
+                    alert("Please paste a transcript first.");
+                    return;
+                }
+
+                // UI loading state
+                const originalBtnText = summarizeBtn.innerText;
+                summarizeBtn.innerText = "Summarizing...";
+                summarizeBtn.disabled = true;
+
+                try {
+                    const response = await fetch("/api/summarize", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ transcript })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Error: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.summary) {
+                        // Assuming result.summary contains HTML or plain text. 
+                        // If it's plain text, we wrap it in basic HTML to fit the prose styling.
+                        summaryOutput.innerHTML = `<p class="text-lg first-letter:text-5xl first-letter:font-headline first-letter:mr-3 first-letter:float-left first-letter:text-primary font-body">${result.summary}</p>`;
+                    } else {
+                        summaryOutput.innerHTML = `<p class="text-error font-bold">Failed to generate summary.</p>`;
+                    }
+                } catch (error) {
+                    console.error("Summarization error:", error);
+                    summaryOutput.innerHTML = `<p class="text-error font-bold">An error occurred while summarizing.</p>`;
+                } finally {
+                    // Reset UI
+                    summarizeBtn.innerText = originalBtnText;
+                    summarizeBtn.disabled = false;
+                }
+            });
+        }
+    });
+</script>
 </body></html>
