@@ -324,4 +324,33 @@
         }
     });
 </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const navMapping = {
+        'Dashboard': '/',
+        'Calendar': '/calendar',
+        'Minutes': '/minutes',
+        'Command Center': '/command'
+    };
+    
+    document.querySelectorAll('a, div, span').forEach(el => {
+        const text = el.innerText ? el.innerText.trim() : el.textContent.trim();
+        for (const [key, path] of Object.entries(navMapping)) {
+            // Find elements containing the exact text as their only content
+            if (text === key && el.children.length === 0) {
+                const clickable = el.closest('a') || el.closest('.cursor-pointer') || el.closest('.group');
+                if (clickable) {
+                    clickable.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.location.href = path;
+                    });
+                }
+            }
+        }
+    });
+});
+</script>
+
 </body></html>
