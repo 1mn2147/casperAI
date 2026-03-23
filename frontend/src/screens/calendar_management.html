@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary-fixed": "#28180d",
+              "on-secondary-fixed-variant": "#574335",
+              "error-container": "#93000a",
+              "on-tertiary-fixed-variant": "#534437",
+              "background": "#d8c3b2", // Warmer, medium-light taupe background
+              "outline": "#8b7e74",
+              "on-primary-fixed": "#241a0e",
+              "inverse-on-surface": "#f2dfd1",
+              "on-surface-variant": "#4f453f",
+              "on-background": "#2a1e16", // High contrast text
+              "on-error-container": "#ffdad6",
+              "on-error": "#690005",
+              "surface-container-highest": "#c5af9d",
+              "secondary-container": "#bfa897",
+              "tertiary-fixed-dim": "#d8c3b2",
+              "surface": "#d8c3b2",
+              "inverse-primary": "#6b5c4c",
+              "on-tertiary-fixed": "#25190f",
+              "secondary-fixed-dim": "#dec1af",
+              "on-primary-fixed-variant": "#524436",
+              "surface-container-low": "#e6d5c8",
+              "secondary": "#574335",
+              "on-secondary-container": "#3a2e21",
+              "outline-variant": "#b8a698",
+              "primary-container": "#a59382",
+              "on-primary": "#ffffff",
+              "error": "#ba1a1a",
+              "on-tertiary": "#ffffff",
+              "inverse-surface": "#2a1e16",
+              "tertiary-container": "#bca897",
+              "surface-container-lowest": "#f0e6dd",
+              "surface-container-high": "#cdb9a9",
+              "on-primary-container": "#241a0e",
+              "surface-bright": "#ede2d8",
+              "on-secondary": "#ffffff",
+              "primary-fixed-dim": "#d7c3b0",
+              "surface-dim": "#cfbaaa",
+              "secondary-fixed": "#fbddca",
+              "on-surface": "#2a1e16",
+              "primary": "#4a3b2e", // Dark brown for primary accents/text
+              "surface-container": "#e1d0c1",
+              "primary-fixed": "#f4dfcb",
+              "tertiary": "#534437",
+              "surface-variant": "#c5af9d",
+              "tertiary-fixed": "#f5decd",
+              "on-tertiary-container": "#25190f",
+              "surface-tint": "#4a3b2e"
+            },
+            fontFamily: {
+              "headline": ["Newsreader"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #d8c3b2;
+            color: #2a1e16;
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 h-full w-64 bg-[#cdb9a9] flex flex-col py-8 z-50 border-r border-outline/20">
+<div class="px-8 mb-12">
+<h1 class="text-primary font-headline text-xl font-bold">ClubAI</h1>
+<p class="text-on-background/60 text-xs font-label">The Cognitive Workspace</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-4 text-on-background/60 pl-4 py-3 hover:bg-surface-container hover:text-primary transition-all group" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="dashboard">dashboard</span>
+<span class="font-label text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-4 text-primary font-bold border-l-4 border-primary pl-4 py-3 group bg-surface-container-low/50" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="calendar_today">calendar_today</span>
+<span class="font-label text-sm">Calendar</span>
+</a>
+<a class="flex items-center gap-4 text-on-background/60 pl-4 py-3 hover:bg-surface-container hover:text-primary transition-all group" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="description">description</span>
+<span class="font-label text-sm">Meeting Minutes</span>
+</a>
+<a class="flex items-center gap-4 text-on-background/60 pl-4 py-3 hover:bg-surface-container hover:text-primary transition-all group" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="terminal">terminal</span>
+<span class="font-label text-sm">AI Command</span>
+</a>
+</nav>
+<div class="mt-auto space-y-2">
+<a class="flex items-center gap-4 text-on-background/60 pl-4 py-3 hover:bg-surface-container hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+<span class="font-label text-sm">Settings</span>
+</a>
+<a class="flex items-center gap-4 text-on-background/60 pl-4 py-3 hover:bg-surface-container hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="help">help</span>
+<span class="font-label text-sm">Help</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 flex-1 flex flex-col min-h-screen">
+<!-- Top App Bar -->
+<header class="fixed top-0 right-0 left-64 z-40 bg-background/95 backdrop-blur-sm flex justify-between items-center px-8 h-16 border-b border-outline/10">
+<div class="flex items-center gap-4">
+<h2 class="font-headline font-bold text-2xl text-primary">Calendar</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative flex items-center bg-surface-container-low px-4 py-1.5 rounded-lg border border-outline/10">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none text-sm focus:ring-0 text-on-surface w-48 placeholder:text-on-surface-variant/50" placeholder="Search events..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-background/70 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-background/70 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<section class="mt-16 p-8 flex gap-8">
+<!-- Calendar Grid Container -->
+<div class="flex-1">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline/5">
+<div class="flex justify-between items-center mb-10">
+<div class="flex items-center gap-6">
+<h3 class="font-headline text-3xl font-bold italic text-primary">October 2024</h3>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-surface-container rounded-lg transition-colors text-primary">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="p-2 hover:bg-surface-container rounded-lg transition-colors text-primary">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="flex bg-surface-container p-1 rounded-lg">
+<button class="px-4 py-1.5 text-xs font-label rounded bg-primary text-on-primary font-bold shadow-sm">Month</button>
+<button class="px-4 py-1.5 text-xs font-label rounded text-primary hover:bg-surface-container-high transition-colors">Week</button>
+<button class="px-4 py-1.5 text-xs font-label rounded text-primary hover:bg-surface-container-high transition-colors">Day</button>
+</div>
+</div>
+<!-- Grid Layout -->
+<div class="grid grid-cols-7 gap-px bg-outline/20 rounded-lg overflow-hidden border border-outline/20">
+<!-- Days Header -->
+<div class="bg-surface-container-low py-3 text-center border-b border-outline/10">
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant font-bold">Sun</span>
+</div>
+<div class="bg-surface-container-low py-3 text-center border-b border-outline/10">
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant font-bold">Mon</span>
+</div>
+<div class="bg-surface-container-low py-3 text-center border-b border-outline/10">
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant font-bold">Tue</span>
+</div>
+<div class="bg-surface-container-low py-3 text-center border-b border-outline/10">
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant font-bold">Wed</span>
+</div>
+<div class="bg-surface-container-low py-3 text-center border-b border-outline/10">
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant font-bold">Thu</span>
+</div>
+<div class="bg-surface-container-low py-3 text-center border-b border-outline/10">
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant font-bold">Fri</span>
+</div>
+<div class="bg-surface-container-low py-3 text-center border-b border-outline/10">
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant font-bold">Sat</span>
+</div>
+<!-- Row 1 -->
+<div class="bg-surface-container-lowest h-32 p-2 opacity-30">
+<span class="text-xs font-label">29</span>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 opacity-30">
+<span class="text-xs font-label">30</span>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">1</span>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label text-primary font-bold">2</span>
+<div class="mt-2 space-y-1">
+<div class="bg-primary/10 border-l-2 border-primary p-1.5 rounded-sm">
+<p class="text-[10px] font-bold text-primary truncate">Board Meeting</p>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">3</span>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">4</span>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2">
+<span class="text-xs font-label">5</span>
+</div>
+<!-- Row 2 -->
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">6</span>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">7</span>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">8</span>
+<div class="mt-2 space-y-1">
+<div class="bg-secondary-container/20 border-l-2 border-secondary p-1.5 rounded-sm">
+<p class="text-[10px] font-bold text-secondary truncate">Design Sync</p>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">9</span>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">10</span>
+<div class="mt-2 space-y-1">
+<div class="bg-primary/10 border-l-2 border-primary p-1.5 rounded-sm">
+<p class="text-[10px] font-bold text-primary truncate">Product Launch</p>
+</div>
+<div class="bg-tertiary-container/20 border-l-2 border-tertiary p-1.5 rounded-sm">
+<p class="text-[10px] font-bold text-tertiary truncate">Review Session</p>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">11</span>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2">
+<span class="text-xs font-label">12</span>
+</div>
+<!-- Row 3 (Today) -->
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">13</span>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">14</span>
+</div>
+<div class="bg-surface-container-high/40 h-32 p-2 border-r border-outline/5">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-on-primary w-6 h-6 flex items-center justify-center bg-primary rounded-full shadow-sm">15</span>
+<span class="w-1.5 h-1.5 bg-primary rounded-full"></span>
+</div>
+<div class="mt-2 space-y-1">
+<div class="bg-primary/20 border-l-2 border-primary p-1.5 rounded-sm shadow-sm">
+<p class="text-[10px] font-bold text-primary truncate">Client Workshop</p>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">16</span>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">17</span>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2 border-r border-outline/5">
+<span class="text-xs font-label">18</span>
+</div>
+<div class="bg-surface-container-lowest h-32 p-2">
+<span class="text-xs font-label">19</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sidebar Info Panel -->
+<div class="w-80 flex flex-col gap-8">
+<!-- Create Event CTA -->
+<button class="w-full bg-primary text-on-primary py-4 rounded-xl flex items-center justify-center gap-2 font-bold shadow-md hover:opacity-90 transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span class="font-label">Create New Event</span>
+</button>
+<!-- Categories -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline/5 shadow-sm">
+<h4 class="font-headline text-lg mb-6 text-primary font-bold">Categories</h4>
+<div class="space-y-4">
+<label class="flex items-center justify-between cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-4 h-4 rounded border-2 border-primary bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px] text-on-primary font-bold" data-icon="check">check</span>
+</div>
+<span class="text-sm font-label text-on-surface group-hover:text-primary transition-colors">Club Meetings</span>
+</div>
+<span class="text-[10px] font-bold bg-surface-container-high px-2 py-0.5 rounded-full text-primary">12</span>
+</label>
+<label class="flex items-center justify-between cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-4 h-4 rounded border-2 border-secondary bg-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px] text-on-primary font-bold" data-icon="check">check</span>
+</div>
+<span class="text-sm font-label text-on-surface group-hover:text-secondary transition-colors">Project Milestones</span>
+</div>
+<span class="text-[10px] font-bold bg-surface-container-high px-2 py-0.5 rounded-full text-secondary">05</span>
+</label>
+<label class="flex items-center justify-between cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-4 h-4 rounded border-2 border-outline/40"></div>
+<span class="text-sm font-label text-on-surface/60 group-hover:text-on-surface transition-colors">Private Focus</span>
+</div>
+<span class="text-[10px] font-bold bg-surface-container-high px-2 py-0.5 rounded-full text-on-surface/40">02</span>
+</label>
+</div>
+</div>
+<!-- Upcoming Events Sidebar -->
+<div class="bg-surface-container-lowest p-6 rounded-xl flex-1 border border-outline/5 shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-headline text-lg text-primary font-bold">Upcoming</h4>
+<button class="text-xs text-primary font-bold hover:underline">View All</button>
+</div>
+<div class="space-y-6">
+<!-- Event Item -->
+<div class="group relative pl-4">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary group-hover:w-2 transition-all"></div>
+<p class="text-[10px] font-bold uppercase tracking-widest text-primary/70 mb-1">Tomorrow · 10:00 AM</p>
+<h5 class="font-headline text-md leading-tight text-on-surface font-bold mb-2">Quarterly Strategic Alignment</h5>
+<div class="flex items-center gap-2">
+<div class="flex -space-x-2">
+<img class="w-6 h-6 rounded-full border-2 border-surface-container-lowest" data-alt="User avatar 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVDZFVRi82nEMziKCkE2fdZCagY7HcPpuBHbEutHskjD-PXghFw7RV-3OD8GNeWRp-E5J2eMD8bkyfnSWYusMaGgqLgNPP6CP4uRlm0PJwglKvEWFZgGUkM8OEqO_QExrTv1yOLf9N3mCZQ27BQazSCLOqo4yD3foLKd-wf60CQf932Jtzue5zZ7EBQ_daUTximlQ2Ve8smJGzDq-stUwhZr3GjDBFTxTTzoSUrYcgNfXo0hVL-uAHkdR5lMc2gpdX1zjL3a8A504"/>
+<img class="w-6 h-6 rounded-full border-2 border-surface-container-lowest" data-alt="User avatar 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIUGq17MLq3B6kplPZuviPWFBfN9wlN9bavmPfNISh5B1iLgUkAEoz1X3fSJol_LOVzUnJ38hGYxPGIyVOnPwXwrNMYiOnOR1aupgugmTOw5KtpAKvEoyyBb3Q4CpjxczvmYIISAKkeiEX9aINSaqkxQXF-i_X8VFE81U35wKrGQIJ5--CG0e77eL7QAzZiJJi2Non4uHJ_TySiDO6lc-jnXrxECPuLT-rSmEMhU5L9JGWWQ43WMLgtYpfiNtq7Hss6i6wxASuCGk"/>
+<div class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-[10px] font-bold text-primary border-2 border-surface-container-lowest">+3</div>
+</div>
+<span class="text-xs text-on-surface-variant font-label">Main Boardroom</span>
+</div>
+</div>
+<!-- Event Item -->
+<div class="group relative pl-4">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary opacity-60 group-hover:opacity-100 transition-opacity"></div>
+<p class="text-[10px] font-bold uppercase tracking-widest text-secondary mb-1">Oct 18 · 2:30 PM</p>
+<h5 class="font-headline text-md leading-tight text-on-surface mb-2">Editorial Review: Workspace AI</h5>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="videocam">videocam</span>
+<span class="text-xs text-on-surface-variant font-label">Google Meet</span>
+</div>
+</div>
+<!-- Event Item -->
+<div class="group relative pl-4">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary opacity-60 group-hover:opacity-100 transition-opacity"></div>
+<p class="text-[10px] font-bold uppercase tracking-widest text-tertiary mb-1">Oct 20 · 9:00 AM</p>
+<h5 class="font-headline text-md leading-tight text-on-surface mb-2">Neural Link Workshop Phase II</h5>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="location_on">location_on</span>
+<span class="text-xs text-on-surface-variant font-label">Innovation Hub</span>
+</div>
+</div>
+</div>
+<!-- Ambient illustration/Texture -->
+<div class="mt-12 opacity-20">
+<div class="h-24 w-full bg-gradient-to-t from-primary to-transparent rounded-lg"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</body></html>

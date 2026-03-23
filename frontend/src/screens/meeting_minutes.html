@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary-fixed": "#241a13",
+              "on-secondary-fixed-variant": "#4d4239",
+              "error-container": "#f9dedc",
+              "on-tertiary-fixed-variant": "#49443a",
+              "background": "#fdf8f4",
+              "outline": "#85736b",
+              "on-primary-fixed": "#2a1805",
+              "inverse-on-surface": "#fbeeeb",
+              "on-surface-variant": "#53433c",
+              "on-background": "#201a17",
+              "on-error-container": "#410002",
+              "on-error": "#ffffff",
+              "surface-container-highest": "#e6e1dd",
+              "secondary-container": "#f1dfd3",
+              "tertiary-fixed-dim": "#d6c6b1",
+              "surface": "#fdf8f4",
+              "inverse-primary": "#f9bc80",
+              "on-tertiary-fixed": "#211b11",
+              "secondary-fixed-dim": "#e0c2b2",
+              "on-primary-fixed-variant": "#633b00",
+              "surface-container-low": "#f6f1ed",
+              "secondary": "#745b4c",
+              "on-secondary-container": "#2b170c",
+              "outline-variant": "#d8c2ba",
+              "primary-container": "#ffdcbe",
+              "on-primary": "#ffffff",
+              "error": "#b3261e",
+              "on-tertiary": "#ffffff",
+              "inverse-surface": "#362f2b",
+              "tertiary-container": "#f1e2cd",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-high": "#ebe6e2",
+              "on-primary-container": "#321d00",
+              "surface-bright": "#fff8f5",
+              "on-secondary": "#ffffff",
+              "primary-fixed-dim": "#ffb77c",
+              "surface-dim": "#e4dfda",
+              "secondary-fixed": "#ffdbc9",
+              "on-surface": "#201a17",
+              "primary": "#8b5000",
+              "surface-container": "#f1ebe7",
+              "primary-fixed": "#ffdcbe",
+              "tertiary": "#6b5e4c",
+              "surface-variant": "#f4e0d7",
+              "tertiary-fixed": "#f2e1cc",
+              "on-tertiary-container": "#241a0d",
+              "surface-tint": "#8b5000"
+            },
+            fontFamily: {
+              "headline": ["Newsreader"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #fdf8f4;
+            color: #201a17;
+            font-family: 'Manrope', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d8c2ba;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 h-full w-64 bg-[#efe7e0] flex flex-col py-8 z-50 border-r border-outline-variant/30">
+<div class="px-8 mb-12">
+<h1 class="text-primary font-['Newsreader'] text-xl font-bold">ClubAI</h1>
+<p class="text-on-surface-variant/60 text-[10px] uppercase tracking-widest font-bold">The Cognitive Workspace</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-4 text-on-surface-variant/70 pl-6 py-2 hover:bg-surface-container hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant/70 pl-6 py-2 hover:bg-surface-container hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label text-sm font-medium">Calendar</span>
+</a>
+<!-- Active Tab: Meeting Minutes -->
+<a class="flex items-center gap-4 text-primary font-bold border-l-4 border-primary pl-5 py-2 bg-surface-container/50" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-label text-sm">Meeting Minutes</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant/70 pl-6 py-2 hover:bg-surface-container hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="font-label text-sm font-medium">AI Command</span>
+</a>
+</nav>
+<div class="px-4 mt-auto pt-8 border-t border-outline-variant/30 space-y-1">
+<a class="flex items-center gap-4 text-on-surface-variant/70 pl-6 py-2 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label text-sm">Settings</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant/70 pl-6 py-2 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-label text-sm">Help</span>
+</a>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-64 h-16 bg-surface/80 backdrop-blur-md flex justify-between items-center px-8 z-40 border-b border-outline-variant/20">
+<div class="flex items-center gap-4">
+<h2 class="font-headline font-bold text-2xl text-on-background">Meeting Intelligence</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="material-symbols-outlined text-on-surface-variant/70 group-hover:text-primary cursor-pointer" data-icon="notifications">notifications</span>
+<div class="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full border border-surface"></div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/70 hover:text-primary cursor-pointer" data-icon="account_circle">account_circle</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 p-8 w-full overflow-y-auto bg-background">
+<div class="max-w-7xl mx-auto grid grid-cols-12 gap-8">
+<!-- Header Section -->
+<section class="col-span-12 lg:col-span-8 space-y-4">
+<div class="inline-block bg-primary-container px-3 py-1 rounded text-[10px] font-bold text-on-primary-container uppercase tracking-widest mb-2">Project: Phoenix Phase II</div>
+<h3 class="font-headline text-5xl font-bold leading-tight text-on-background">Product Strategy Alignment &amp; Infrastructure Audit</h3>
+<div class="flex gap-6 text-on-surface-variant/80 text-sm">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="event">event</span> Oct 24, 2023</span>
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span> 54 mins</span>
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="group">group</span> 6 Participants</span>
+</div>
+</section>
+<!-- Recording Player -->
+<section class="col-span-12 bg-surface-container p-6 rounded-xl border border-outline-variant/20 shadow-sm">
+<div class="flex items-center gap-6">
+<button class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-on-primary hover:bg-primary/90 transition-all">
+<span class="material-symbols-outlined" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<div class="flex-1 space-y-2">
+<div class="h-1.5 bg-outline-variant/50 rounded-full overflow-hidden relative">
+<div class="absolute inset-y-0 left-0 w-1/3 bg-primary"></div>
+</div>
+<div class="flex justify-between text-[11px] font-bold text-on-surface-variant/70 tracking-tight">
+<span>18:24</span>
+<span>54:00</span>
+</div>
+</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-on-surface-variant/80 hover:text-primary cursor-pointer" data-icon="replay_10">replay_10</span>
+<span class="material-symbols-outlined text-on-surface-variant/80 hover:text-primary cursor-pointer" data-icon="forward_30">forward_30</span>
+<span class="material-symbols-outlined text-on-surface-variant/80 hover:text-primary cursor-pointer" data-icon="speed">speed</span>
+</div>
+</div>
+</section>
+<!-- AI Summary -->
+<section class="col-span-12 lg:col-span-7 bg-surface-container-low p-10 rounded-xl space-y-6 border border-outline-variant/30 shadow-sm">
+<div class="flex justify-between items-center">
+<h4 class="font-headline text-3xl font-bold text-on-background">AI Summary</h4>
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="prose prose-stone max-w-none space-y-6 text-on-surface-variant leading-relaxed">
+<p class="text-lg first-letter:text-5xl first-letter:font-headline first-letter:mr-3 first-letter:float-left first-letter:text-primary font-body">The meeting focused on resolving the bottlenecks in Phase II deployment, specifically targeting the latent issues within the primary database shards. Marcus provided a comprehensive overview of the current lag times, which have spiked since the Tuesday rollout.</p>
+<div class="bg-primary/5 p-6 border-l-4 border-primary/40 italic font-headline text-xl text-on-surface/90 rounded-r-lg">
+                    "If we don't address the caching layer by Friday, the weekend traffic will likely cause a full service interruption." — Marcus Thorne
+                </div>
+<ul class="space-y-4 list-none p-0 text-on-surface/80">
+<li class="flex gap-4"><span class="text-primary font-bold text-lg leading-none">01</span> Discussion on migration to distributed nodes vs vertical scaling.</li>
+<li class="flex gap-4"><span class="text-primary font-bold text-lg leading-none">02</span> Evaluation of the new UI feedback loop from the Beta testers.</li>
+<li class="flex gap-4"><span class="text-primary font-bold text-lg leading-none">03</span> Budget reallocation for Q4 infrastructure upgrades.</li>
+</ul>
+</div>
+</section>
+<!-- Action Items -->
+<section class="col-span-12 lg:col-span-5 bg-[#f5efea] p-8 rounded-xl space-y-8 border border-outline-variant/40 shadow-sm">
+<h4 class="font-headline text-2xl font-bold text-on-background">Action Items</h4>
+<div class="space-y-4">
+<div class="group flex gap-4 p-4 rounded-lg bg-surface hover:bg-surface-container-highest transition-all cursor-pointer border border-outline-variant/10">
+<div class="w-6 h-6 rounded border-2 border-outline mt-1 flex items-center justify-center group-hover:border-primary"></div>
+<div class="space-y-1">
+<p class="font-bold text-on-surface">Finalize shard migration docs</p>
+<p class="text-[10px] text-on-surface-variant/80 uppercase tracking-widest font-bold">Assignee: Elena V.</p>
+</div>
+</div>
+<div class="group flex gap-4 p-4 rounded-lg bg-surface hover:bg-surface-container-highest transition-all cursor-pointer border border-outline-variant/10">
+<div class="w-6 h-6 rounded border-2 border-outline mt-1 flex items-center justify-center group-hover:border-primary"></div>
+<div class="space-y-1">
+<p class="font-bold text-on-surface">Audit caching layer latency</p>
+<p class="text-[10px] text-on-surface-variant/80 uppercase tracking-widest font-bold">Assignee: Marcus T.</p>
+</div>
+</div>
+<div class="group flex gap-4 p-4 rounded-lg bg-surface hover:bg-surface-container-highest transition-all cursor-pointer border border-outline-variant/10">
+<div class="w-6 h-6 rounded border-2 border-outline mt-1 flex items-center justify-center group-hover:border-primary"></div>
+<div class="space-y-1">
+<p class="font-bold text-on-surface">Client review for Phoenix V2</p>
+<p class="text-[10px] text-on-surface-variant/80 uppercase tracking-widest font-bold">Assignee: Sarah L.</p>
+</div>
+</div>
+<div class="group flex gap-4 p-4 rounded-lg bg-surface/60 border border-outline-variant/10">
+<div class="w-6 h-6 rounded border-2 border-primary bg-primary/10 mt-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-xs text-primary font-bold" data-icon="check">check</span>
+</div>
+<div class="space-y-1 opacity-60 line-through">
+<p class="font-bold text-on-surface">Schedule infra-meeting</p>
+<p class="text-[10px] text-on-surface-variant/80 uppercase tracking-widest font-bold">Completed</p>
+</div>
+</div>
+</div>
+<button class="w-full py-4 border border-primary/30 text-primary font-bold text-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all rounded-lg">Export Action Items</button>
+</section>
+<!-- Full Transcript -->
+<section class="col-span-12 bg-surface-container-high p-10 rounded-xl space-y-8 border border-outline-variant/20 shadow-sm">
+<div class="flex justify-between items-center border-b border-outline-variant/30 pb-6">
+<h4 class="font-headline text-3xl font-bold text-on-background">Full Transcript</h4>
+<div class="flex gap-2">
+<div class="bg-surface px-4 py-2 rounded flex items-center gap-3 text-sm border border-outline-variant/20">
+<span class="material-symbols-outlined text-sm text-on-surface-variant/60" data-icon="search">search</span>
+<span class="text-on-surface-variant/60 font-medium">Search transcript...</span>
+</div>
+</div>
+</div>
+<div class="space-y-10 max-h-[600px] overflow-y-auto pr-6 custom-scrollbar">
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20 bg-primary-container">
+<img alt="Marcus Thorne" class="w-full h-full object-cover" data-alt="Portrait of a professional man Marcus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcnTnOAaTxMjQkRR6cXti6B0bbDRXsbXtOJxMGtkAnEbphXdavG0rUVPnjoDzBcqGe_V2eErPdve8RDBzf4Y1avBgFlMSj192QCYPTa4KEDfvOVPyCpQuxhd5JlMsHzdVY-Wu9GLPM3arS1qQQyqcrj5BpBDoMeewstHkNvjtqCqhWs-NPLTqefPeqOyhy9lI-Z2NIO7o9gdr763An7PeqyFbLAjBUTE9DrpM7eY1CoL2yQiQcsPU-lT9WNvyqW_lLRLMhk5jpFmo"/>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-3">
+<span class="font-bold text-primary">Marcus Thorne</span>
+<span class="text-xs text-on-surface-variant/60 font-bold">00:02</span>
+</div>
+<p class="text-on-surface/90 leading-relaxed font-medium">Morning everyone. Let's dive straight in. I’ve been looking at the latency metrics from the overnight batch processing. The Phoenix shards are struggling with the increased write operations.</p>
+</div>
+</div>
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20 bg-secondary-container">
+<img alt="Elena Vasquez" class="w-full h-full object-cover" data-alt="Portrait of a professional woman Elena" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjwTQdtvwjRYQshLj_0f1d8O0vdbYVaxtaDoMfWqUIg0MWViWTxWYTewOQRFc9kyRs6IkGms-3WCHGTJwoRJ_n6t9Ii4yzzPkHKSJQN4wOsQn8TC5q8zGl0h7PJwhnZmmonBbRR_tWLAco_pH2KF1U-H8GgEp3o9FEjVjdcd5zR-F0DSlQjr7dW4ePrz6c6zN4pDpfEPNkZiTVKLgBOTKbkuYKmmh6GZ5E9ZfNAdZoCqK1mQAwW-MLLgDDugek4ZTsVPwKgyi6faA"/>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-3">
+<span class="font-bold text-primary">Elena Vasquez</span>
+<span class="text-xs text-on-surface-variant/60 font-bold">00:45</span>
+</div>
+<p class="text-on-surface/90 leading-relaxed font-medium">I noticed that too. Is that a limitation of the current hardware or is it the indexing strategy we implemented last week?</p>
+</div>
+</div>
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20 bg-primary-container">
+<img alt="Marcus Thorne" class="w-full h-full object-cover" data-alt="Portrait of a professional man Marcus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgcGSiXrbt3OBvUdyAXfEn6Cj2-pXJ4ciU15a6e-sKIdfitUaolygDRhfFF5m-wUbF8nCpiUZNbucNZglqWAS8HedXdX-nX1XABayJNiCF8rGJV4zqKstvP9RFzFcx3T1n1NndmRgvvNVftLmKLAtka9h-TjCcN9fQHhf3hD1NdkqUSOIciNy8Z54w8px5ytayiq0tT9Q89s54DMES7xKRBQb-qffz5SUS4qrUcAo8FOz1HDvCmrVAEsazsV4COqqL7P8YDxiMaPE"/>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-3">
+<span class="font-bold text-primary">Marcus Thorne</span>
+<span class="text-xs text-on-surface-variant/60 font-bold">01:12</span>
+</div>
+<p class="text-on-surface/90 leading-relaxed font-medium">Likely both. The indices are heavy, but the hardware is definitely redlining. We need to look at either offloading the read-load to replicas or moving to the distributed node structure we discussed in Q2.</p>
+</div>
+</div>
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20 bg-tertiary-container">
+<img alt="Sarah Lin" class="w-full h-full object-cover" data-alt="Portrait of a professional woman Sarah" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgfais9ODqc7z6qlw4_8zp6TDfjhBXWdD_l_z4wCvpD89B1s46Nri7v9o965eSVoIgFVOxDIC2AdqAHMS0S2BhWxuDfvw6g60kPg0SSszoS6mmvo1iGJTTMDD07VrsGC0iSdYOwF-WaYuZ2HhBYP04U6uDxJKSdzdSte8t2aH-WMVepwwEVZDILACg8B4TCnc2V1P3xShCJk5nlTwSxrggENs9NOZqUkXq2cpUgB0vqmTA96ROPZlpJi3lIX9q9rAr7pB7mPN7lYM"/>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-3">
+<span class="font-bold text-primary">Sarah Lin</span>
+<span class="text-xs text-on-surface-variant/60 font-bold">02:30</span>
+</div>
+<p class="text-on-surface/90 leading-relaxed font-medium">From the client side, the lag is starting to become noticeable during peak hours. If we don't address the caching layer by Friday, the weekend traffic will likely cause a full service interruption. We need a temporary fix before we commit to a full migration.</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer Spacer -->
+<div class="h-16"></div>
+</main>
+</body></html>
