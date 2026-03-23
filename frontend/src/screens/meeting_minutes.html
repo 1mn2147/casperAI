@@ -147,9 +147,9 @@
 <!-- Header Section -->
 <section class="col-span-12 lg:col-span-8 space-y-4">
 <div class="inline-block bg-primary-container px-3 py-1 rounded text-[10px] font-bold text-on-primary-container uppercase tracking-widest mb-2">Project: Phoenix Phase II</div>
-<h3 class="font-headline text-5xl font-bold leading-tight text-on-background">Product Strategy Alignment &amp; Infrastructure Audit</h3>
+<h3 id="minute-title" class="font-headline text-5xl font-bold leading-tight text-on-background">Product Strategy Alignment &amp; Infrastructure Audit</h3>
 <div class="flex gap-6 text-on-surface-variant/80 text-sm">
-<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="event">event</span> Oct 24, 2023</span>
+<span id="minute-date" class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="event">event</span> Oct 24, 2023</span>
 <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span> 54 mins</span>
 <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="group">group</span> 6 Participants</span>
 </div>
@@ -252,10 +252,39 @@
 <div class="h-16"></div>
 </main>
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
         const summarizeBtn = document.getElementById("summarizeBtn");
         const transcriptInput = document.getElementById("transcriptInput");
         const summaryOutput = document.getElementById("summaryOutput");
+        const minuteTitle = document.getElementById("minute-title");
+        const minuteDate = document.getElementById("minute-date");
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentId = urlParams.get('id');
+
+        if (currentId) {
+            try {
+                const response = await fetch(`/api/minutes/${currentId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (minuteTitle) minuteTitle.innerText = data.title || "Untitled Minute";
+                    if (minuteDate) minuteDate.innerHTML = `<span class="material-symbols-outlined text-sm" data-icon="event">event</span> ${data.date || new Date().toLocaleDateString()}`;
+                    if (transcriptInput) transcriptInput.value = data.transcript || "";
+                    if (summaryOutput && data.summary) {
+                        summaryOutput.innerHTML = `<p class="text-lg first-letter:text-5xl first-letter:font-headline first-letter:mr-3 first-letter:float-left first-letter:text-primary font-body">${data.summary}</p>`;
+                    }
+                } else {
+                    if (minuteTitle) minuteTitle.innerText = "Meeting Not Found";
+                }
+            } catch (err) {
+                console.error("Error fetching minute:", err);
+            }
+        } else {
+            if (minuteTitle) minuteTitle.innerText = "새로운 회의록";
+            if (minuteDate) minuteDate.innerHTML = `<span class="material-symbols-outlined text-sm" data-icon="event">event</span> ${new Date().toLocaleDateString()}`;
+            if (transcriptInput) transcriptInput.value = "";
+            if (summaryOutput) summaryOutput.innerHTML = `<p class="text-lg font-body text-on-surface-variant/50">Transcript를 입력하고 Summarize를 눌러주세요.</p>`;
+        }
 
         if (summarizeBtn && transcriptInput && summaryOutput) {
             summarizeBtn.addEventListener("click", async () => {
@@ -271,12 +300,18 @@
                 summarizeBtn.disabled = true;
 
                 try {
+                    const bodyData = { transcript };
+                    const currentId = new URLSearchParams(window.location.search).get('id');
+                    if (currentId) {
+                        bodyData.id = currentId;
+                    }
+
                     const response = await fetch("/api/summarize", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
                         },
-                        body: JSON.stringify({ transcript })
+                        body: JSON.stringify(bodyData)
                     });
 
                     if (!response.ok) {
@@ -285,9 +320,13 @@
 
                     const result = await response.json();
                     
+                    if (result.status === "success" && result.id && !currentId) {
+                        const newUrl = new URL(window.location);
+                        newUrl.searchParams.set('id', result.id);
+                        window.history.pushState({}, '', newUrl);
+                    }
+                    
                     if (result.summary) {
-                        // Assuming result.summary contains HTML or plain text. 
-                        // If it's plain text, we wrap it in basic HTML to fit the prose styling.
                         summaryOutput.innerHTML = `<p class="text-lg first-letter:text-5xl first-letter:font-headline first-letter:mr-3 first-letter:float-left first-letter:text-primary font-body">${result.summary}</p>`;
                     } else {
                         summaryOutput.innerHTML = `<p class="text-error font-bold">Failed to generate summary.</p>`;
@@ -311,7 +350,8 @@ document.addEventListener("DOMContentLoaded", () => {
         'Dashboard': '/',
         'Calendar': '/calendar',
         'Minutes': '/minutes',
-        'Command Center': '/command'
+        'Command Center': '/command',
+        'AI Command': '/command'
     };
     
     document.querySelectorAll('a, div, span').forEach(el => {

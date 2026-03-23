@@ -1,6 +1,8 @@
 import os
 import shutil
-from fastapi import FastAPI, UploadFile, File, BackgroundTasks
+import json
+from typing import Optional
+from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
@@ -8,15 +10,14 @@ from pydantic import BaseModel
 from .stt_tts import transcribe_audio, synthesize_speech
 from .llm import parse_command, summarize_minutes
 from .calendar_api import get_upcoming_events, add_event
+from .database import save_minutes, get_latest_minutes, get_minutes_by_id
 
 app = FastAPI(title="CasperAI Backend")
 
-# 프론트엔드 정적 파일 마운트
 app.mount("/static", StaticFiles(directory="frontend/src/screens"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
-    """메인 화면(대시보드) 반환"""
     with open("frontend/src/screens/dashboard_overview.html", "r", encoding="utf-8") as f:
         return f.read()
 
@@ -37,27 +38,42 @@ def get_command_view():
 
 @app.post("/api/voice-command")
 async def handle_voice_command(audio: UploadFile = File(...)):
-    """음성 명령 처리 API: STT -> LLM 의도 파악"""
     temp_path = f"temp_{audio.filename}"
     with open(temp_path, "wb") as buffer:
         shutil.copyfileobj(audio.file, buffer)
     
     try:
-        # 1. 음성을 텍스트로 변환 (STT)
         transcript = transcribe_audio(temp_path)
+        parsed = parse_command(transcript)
+        intent = parsed.get("intent")
         
-        # 2. 텍스트를 LLM에 넘겨 의도 분석
-        intent = parse_command(transcript)
+        reply_text = "명령을 처리했습니다."
         
-        # 3. 임시로 시스템 대답 생성 (TTS)
-        reply_text = f"다음과 같이 인식되었습니다: {transcript}"
+        if intent == "schedule_meeting":
+            try:
+                summary = parsed.get("summary", "New Meeting")
+                desc = parsed.get("description", "")
+                start = parsed.get("start_time")
+                end = parsed.get("end_time")
+                add_event(summary, desc, start, end)
+                reply_text = f"구글 캘린더에 {summary} 일정을 추가했습니다."
+            except Exception as e:
+                reply_text = f"일정 추가 중 오류가 발생했습니다: {str(e)}"
+                
+        elif intent == "take_minutes":
+            reply_text = "회의록 작성 페이지로 이동하겠습니다."
+            
+        elif intent == "general_query":
+            reply_text = parsed.get("reply", "네, 알겠습니다.")
+            
         tts_output = f"response_{audio.filename}.mp3"
         synthesize_speech(reply_text, tts_output)
         
         return {
             "status": "success",
             "transcript": transcript,
-            "intent": intent,
+            "intent": parsed,
+            "reply": reply_text,
             "audio_response_url": f"/api/audio/{tts_output}"
         }
     except Exception as e:
@@ -72,7 +88,6 @@ def get_audio_response(filename: str):
 
 @app.get("/api/events")
 def fetch_events():
-    """캘린더 이벤트 가져오기 API"""
     try:
         events = get_upcoming_events()
         return {"status": "success", "events": events}
@@ -81,12 +96,32 @@ def fetch_events():
 
 class MinutesRequest(BaseModel):
     transcript: str
+    title: Optional[str] = "새로운 회의록"
 
 @app.post("/api/summarize")
 def generate_minutes(req: MinutesRequest):
-    """회의록 요약 API"""
     try:
         summary = summarize_minutes(req.transcript)
-        return {"status": "success", "summary": summary}
+        # DB에 저장
+        min_id = save_minutes(req.title, req.transcript, summary)
+        return {"status": "success", "summary": summary, "id": min_id}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@app.get("/api/minutes")
+def fetch_latest_minutes(limit: int = Query(5, ge=1)):
+    try:
+        minutes = get_latest_minutes(limit)
+        return {"status": "success", "minutes": minutes}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@app.get("/api/minutes/{min_id}")
+def fetch_minutes_by_id(min_id: int):
+    try:
+        minute = get_minutes_by_id(min_id)
+        if minute:
+            return {"status": "success", "minute": minute}
+        return {"status": "error", "message": "Not found"}
     except Exception as e:
         return {"status": "error", "message": str(e)}

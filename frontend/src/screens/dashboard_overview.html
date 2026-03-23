@@ -228,7 +228,7 @@
 <section class="md:col-span-7 bg-surface-container rounded-xl overflow-hidden flex flex-col border border-outline-variant/20">
 <div class="p-8">
 <h3 class="text-xl font-headline mb-6">Latest Minutes</h3>
-<div class="grid grid-cols-2 gap-6">
+<div class="grid grid-cols-2 gap-6" id="latest-minutes-list">
 <div class="aspect-[3/4] bg-surface-container-low rounded-lg p-6 flex flex-col justify-between border border-outline-variant/30 hover:border-primary/50 transition-all group cursor-pointer shadow-sm">
 <div>
 <div class="flex justify-between items-start mb-4">
@@ -327,7 +327,8 @@ document.addEventListener("DOMContentLoaded", () => {
         'Dashboard': '/',
         'Calendar': '/calendar',
         'Minutes': '/minutes',
-        'Command Center': '/command'
+        'Command Center': '/command',
+        'AI Command': '/command'
     };
     
     document.querySelectorAll('a, div, span').forEach(el => {
@@ -346,6 +347,63 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    function getRelativeTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        
+        if (diffInSeconds < 60) return "Just now";
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+        if (diffInSeconds < 172800) return "Yesterday";
+        return date.toLocaleDateString();
+    }
+
+    const minutesList = document.getElementById("latest-minutes-list");
+    if (minutesList) {
+        fetch('/api/minutes?limit=2')
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch minutes');
+                return res.json();
+            })
+            .then(data => {
+                if (data.status === "success" && data.minutes && data.minutes.length > 0) {
+                    minutesList.innerHTML = '';
+                    data.minutes.forEach((minute, index) => {
+                        const timeStr = getRelativeTime(minute.created_at);
+                        const summary = minute.summary ? (minute.summary.length > 100 ? minute.summary.substring(0, 100) + '...' : minute.summary) : 'No summary available...';
+                        
+                        const avatarsHTML = index % 2 === 0 
+                            ? `<div class="w-6 h-6 rounded-full bg-secondary-container border-2 border-surface"></div>
+                               <div class="w-6 h-6 rounded-full bg-primary-container border-2 border-surface"></div>`
+                            : `<div class="w-6 h-6 rounded-full bg-surface-container-highest border-2 border-surface"></div>`;
+
+                        const html = `
+                        <div onclick="window.location.href='/minutes?id=${minute.id}'" class="aspect-[3/4] bg-surface-container-low rounded-lg p-6 flex flex-col justify-between border border-outline-variant/30 hover:border-primary/50 transition-all group cursor-pointer shadow-sm">
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="material-symbols-outlined text-primary/60 group-hover:text-primary transition-colors" data-icon="description">description</span>
+                                    <span class="text-[10px] font-label text-on-surface-variant">${timeStr}</span>
+                                </div>
+                                <h4 class="font-headline text-lg text-on-background group-hover:text-primary transition-colors">${minute.title || 'Untitled'}</h4>
+                                <p class="text-xs text-on-surface-variant mt-2 line-clamp-3">${summary}</p>
+                            </div>
+                            <div class="flex -space-x-2">
+                                ${avatarsHTML}
+                            </div>
+                        </div>
+                        `;
+                        minutesList.insertAdjacentHTML('beforeend', html);
+                    });
+                }
+            })
+            .catch(err => console.error('Error fetching minutes:', err));
+    }
 });
 </script>
 
