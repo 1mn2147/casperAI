@@ -1,3 +1,9 @@
-openai-whisper\ngTTS\nlibrosa\ntorch\ntorchaudio
-\nopenai\n
-google-api-python-client\ngoogle-auth-httplib2\ngoogle-auth-oauthlib
+openai-whisper
+gTTS
+librosa
+torch
+torchaudio
+openai
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
