@@ -22,6 +22,19 @@ app = FastAPI(title="CasperAI Backend")
 
 app.mount("/static", StaticFiles(directory=str(SCREENS_DIR)), name="static")
 
+
+def infer_minutes_title(transcript: str, fallback: str = "새로운 회의록") -> str:
+    for raw_line in transcript.splitlines():
+        line = raw_line.strip()
+        if line:
+            return line[:80]
+
+    compact = " ".join(transcript.split()).strip()
+    if compact:
+        return compact[:80]
+
+    return fallback
+
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     with (SCREENS_DIR / "dashboard_overview.html").open("r", encoding="utf-8") as f:
@@ -114,19 +127,23 @@ class MinutesRequest(BaseModel):
 def generate_minutes(req: MinutesRequest):
     try:
         summary = summarize_minutes(req.transcript)
+        requested_title = (req.title or "").strip()
 
         if req.id is not None:
             existing_minute = get_minutes_by_id(req.id)
             if not existing_minute:
                 return {"status": "error", "message": "Not found"}
 
-            title = req.title or existing_minute.get("title") or "새로운 회의록"
+            existing_title = (existing_minute.get("title") or "").strip()
+            title = requested_title or existing_title
+            if not title or title == "새로운 회의록":
+                title = infer_minutes_title(req.transcript)
             updated = update_minutes(req.id, title, req.transcript, summary)
             if not updated:
                 return {"status": "error", "message": "Not found"}
             min_id = req.id
         else:
-            title = req.title or "새로운 회의록"
+            title = requested_title or infer_minutes_title(req.transcript)
             min_id = save_minutes(title, req.transcript, summary)
         return {"status": "success", "summary": summary, "id": min_id}
     except Exception as e:
