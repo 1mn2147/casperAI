@@ -284,10 +284,28 @@
 <!-- Sidebar Info Panel -->
 <div class="w-80 flex flex-col gap-8">
 <!-- Create Event CTA -->
-<button class="w-full bg-primary text-on-primary py-4 rounded-xl flex items-center justify-center gap-2 font-bold shadow-md hover:opacity-90 transition-all active:scale-95">
+<button id="createEventBtn" class="w-full bg-primary text-on-primary py-4 rounded-xl flex items-center justify-center gap-2 font-bold shadow-md hover:opacity-90 transition-all active:scale-95">
 <span class="material-symbols-outlined" data-icon="add">add</span>
 <span class="font-label">Create New Event</span>
 </button>
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline/5 shadow-sm space-y-4">
+<div class="flex items-start justify-between gap-4">
+<div>
+<h4 class="font-headline text-lg text-primary font-bold">Google Calendar</h4>
+<p id="calendarStatusText" class="text-sm text-on-surface-variant font-label mt-2">Checking connection status...</p>
+</div>
+<button id="calendarConnectBtn" class="shrink-0 bg-surface-container text-primary px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-surface-container-high transition-colors">Connect</button>
+</div>
+<div id="calendarConnectPanel" class="hidden space-y-3 border-t border-outline/10 pt-4">
+<p class="text-xs text-on-surface-variant leading-relaxed">1. Open the Google auth page. 2. Finish sign-in. 3. Copy the final redirected URL from your browser address bar and paste it below.</p>
+<a id="calendarAuthLink" class="hidden text-sm text-primary underline break-all" href="#" rel="noopener noreferrer" target="_blank"></a>
+<textarea id="calendarRedirectInput" class="w-full min-h-[96px] rounded-lg border border-outline/20 bg-surface-container-lowest text-sm text-on-surface placeholder:text-on-surface-variant/50" placeholder="Paste the full redirected URL here..."></textarea>
+<div class="flex gap-3">
+<button id="calendarCompleteBtn" class="bg-primary text-on-primary px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all">Finish Connection</button>
+<button id="calendarCancelConnectBtn" class="bg-surface-container text-primary px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-surface-container-high transition-colors">Cancel</button>
+</div>
+</div>
+</div>
 <!-- Categories -->
 <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline/5 shadow-sm">
 <h4 class="font-headline text-lg mb-6 text-primary font-bold">Categories</h4>
@@ -369,65 +387,274 @@
 </div>
 </section>
 </main>
+<div id="createEventModal" class="hidden fixed inset-0 z-[60] bg-on-background/40 backdrop-blur-sm items-center justify-center p-6">
+<div class="w-full max-w-xl bg-surface-container-lowest rounded-2xl shadow-xl border border-outline/10 p-6 space-y-5">
+<div class="flex items-center justify-between">
+<h3 class="font-headline text-2xl text-primary">Create Calendar Event</h3>
+<button id="closeEventModalBtn" class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<input id="eventSummaryInput" class="rounded-lg border border-outline/20 bg-surface-container-lowest text-sm text-on-surface placeholder:text-on-surface-variant/50" placeholder="Event title" type="text"/>
+<textarea id="eventDescriptionInput" class="rounded-lg border border-outline/20 bg-surface-container-lowest text-sm text-on-surface placeholder:text-on-surface-variant/50 min-h-[120px]" placeholder="Description"></textarea>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Start</label>
+<input id="eventStartInput" class="w-full rounded-lg border border-outline/20 bg-surface-container-lowest text-sm text-on-surface" type="datetime-local"/>
+</div>
+<div>
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">End</label>
+<input id="eventEndInput" class="w-full rounded-lg border border-outline/20 bg-surface-container-lowest text-sm text-on-surface" type="datetime-local"/>
+</div>
+</div>
+</div>
+<p id="createEventStatusText" class="text-sm text-on-surface-variant font-label"></p>
+<div class="flex justify-end gap-3">
+<button id="cancelEventCreateBtn" class="bg-surface-container text-primary px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-surface-container-high transition-colors">Cancel</button>
+<button id="submitEventBtn" class="bg-primary text-on-primary px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all">Save Event</button>
+</div>
+</div>
+</div>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const eventList = document.getElementById("eventList");
-    
-    fetch("/api/events")
-      .then(response => {
-        if (!response.ok) throw new Error("Failed to fetch events");
-        return response.json();
-      })
-      .then(data => {
-        if (data.status === "success" && data.events) {
-          eventList.innerHTML = "";
-          if (data.events.length === 0) {
-            eventList.innerHTML = `<p class="text-sm text-on-surface-variant font-label">No upcoming events.</p>`;
-            return;
-          }
-          
-          data.events.forEach((event, index) => {
-            const colors = ['primary', 'secondary', 'tertiary'];
-            const color = colors[index % colors.length];
-            
-            const dtString = event.start?.dateTime || event.start?.date || new Date().toISOString();
-            const dateObj = new Date(dtString);
-            
-            const monthOpts = { month: 'short', day: 'numeric' };
-            const timeOpts = { hour: 'numeric', minute: '2-digit' };
-            
-            const isAllDay = !event.start?.dateTime;
-            let formattedDate = dateObj.toLocaleDateString(undefined, monthOpts);
-            if (!isAllDay) {
-                formattedDate += " · " + dateObj.toLocaleTimeString(undefined, timeOpts);
-            }
-            
-            const locationText = event.location || "Google Meet / No location";
-            const icon = event.location ? "location_on" : "videocam";
-            const title = event.summary || "Untitled Event";
-            
-            const eventHtml = `
-              <div class="group relative pl-4">
-                <div class="absolute left-0 top-0 bottom-0 w-1 bg-${color} opacity-60 group-hover:opacity-100 group-hover:w-2 transition-all"></div>
-                <p class="text-[10px] font-bold uppercase tracking-widest text-${color} mb-1">${formattedDate}</p>
-                <h5 class="font-headline text-md leading-tight text-on-surface font-bold mb-2">${title}</h5>
-                <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="${icon}">${icon}</span>
-                  <span class="text-xs text-on-surface-variant font-label">${locationText}</span>
-                </div>
-              </div>
-            `;
-            
-            eventList.insertAdjacentHTML("beforeend", eventHtml);
-          });
-        } else {
-          eventList.innerHTML = `<p class="text-sm text-error font-label">Error loading events data.</p>`;
+    const statusText = document.getElementById("calendarStatusText");
+    const connectBtn = document.getElementById("calendarConnectBtn");
+    const connectPanel = document.getElementById("calendarConnectPanel");
+    const authLink = document.getElementById("calendarAuthLink");
+    const redirectInput = document.getElementById("calendarRedirectInput");
+    const completeBtn = document.getElementById("calendarCompleteBtn");
+    const cancelConnectBtn = document.getElementById("calendarCancelConnectBtn");
+    const createEventBtn = document.getElementById("createEventBtn");
+    const createEventModal = document.getElementById("createEventModal");
+    const closeEventModalBtn = document.getElementById("closeEventModalBtn");
+    const cancelEventCreateBtn = document.getElementById("cancelEventCreateBtn");
+    const submitEventBtn = document.getElementById("submitEventBtn");
+    const createEventStatusText = document.getElementById("createEventStatusText");
+    const eventSummaryInput = document.getElementById("eventSummaryInput");
+    const eventDescriptionInput = document.getElementById("eventDescriptionInput");
+    const eventStartInput = document.getElementById("eventStartInput");
+    const eventEndInput = document.getElementById("eventEndInput");
+
+    const colorMap = [
+      { bar: 'bg-primary', text: 'text-primary' },
+      { bar: 'bg-secondary', text: 'text-secondary' },
+      { bar: 'bg-tertiary', text: 'text-tertiary' },
+    ];
+
+    function toSeoulIso(value) {
+      if (!value) return "";
+      return `${value}:00+09:00`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function toggleEventModal(show) {
+      createEventModal.classList.toggle('hidden', !show);
+      createEventModal.classList.toggle('flex', show);
+      if (!show) {
+        createEventStatusText.textContent = '';
+      }
+    }
+
+    function renderEvents(data) {
+      eventList.innerHTML = "";
+
+      if (!data.events || data.events.length === 0) {
+        eventList.innerHTML = `<p class="text-sm text-on-surface-variant font-label">No upcoming events.</p>`;
+        return;
+      }
+
+      data.events.forEach((event, index) => {
+        const color = colorMap[index % colorMap.length];
+        const dtString = event.start?.dateTime || event.start?.date || new Date().toISOString();
+        const dateObj = new Date(dtString);
+        const monthOpts = { month: 'short', day: 'numeric' };
+        const timeOpts = { hour: 'numeric', minute: '2-digit' };
+        const isAllDay = !event.start?.dateTime;
+        let formattedDate = dateObj.toLocaleDateString(undefined, monthOpts);
+        if (!isAllDay) {
+          formattedDate += " · " + dateObj.toLocaleTimeString(undefined, timeOpts);
         }
-      })
-      .catch(error => {
+
+        const locationText = event.location || "Google Meet / No location";
+        const icon = event.location ? "location_on" : "videocam";
+        const title = event.summary || "Untitled Event";
+        const safeTitle = escapeHtml(title);
+        const safeLocationText = escapeHtml(locationText);
+        const safeIcon = escapeHtml(icon);
+
+        const eventHtml = `
+          <div class="group relative pl-4">
+            <div class="absolute left-0 top-0 bottom-0 w-1 ${color.bar} opacity-60 group-hover:opacity-100 group-hover:w-2 transition-all"></div>
+            <p class="text-[10px] font-bold uppercase tracking-widest ${color.text} mb-1">${formattedDate}</p>
+            <h5 class="font-headline text-md leading-tight text-on-surface font-bold mb-2">${safeTitle}</h5>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="${safeIcon}">${safeIcon}</span>
+              <span class="text-xs text-on-surface-variant font-label">${safeLocationText}</span>
+            </div>
+          </div>
+        `;
+
+        eventList.insertAdjacentHTML("beforeend", eventHtml);
+      });
+    }
+
+    async function loadCalendarStatus() {
+      try {
+        const response = await fetch('/api/calendar/status');
+        const data = await response.json();
+        if (data.status === 'success') {
+          statusText.textContent = data.message;
+          connectBtn.textContent = data.connected ? 'Connected' : data.configured ? 'Connect' : 'Setup Needed';
+          connectBtn.disabled = !!data.connected || !data.configured;
+          connectBtn.classList.toggle('opacity-60', !!data.connected || !data.configured);
+          if (!data.connected && !data.configured) {
+            eventList.innerHTML = `<p class="text-sm text-on-surface-variant font-label">Add <code>backend/credentials.json</code> and complete Google Calendar setup to see events here.</p>`;
+          }
+        } else {
+          statusText.textContent = data.message || 'Failed to check calendar status.';
+        }
+      } catch (error) {
+        statusText.textContent = 'Failed to check calendar status.';
+      }
+    }
+
+    async function loadEvents() {
+      try {
+        const response = await fetch("/api/events");
+        const data = await response.json();
+        if (data.status === 'success' && data.events) {
+          renderEvents(data);
+        } else {
+          eventList.innerHTML = `<p class="text-sm text-on-surface-variant font-label">${escapeHtml(data.message || 'Connect Google Calendar to see your upcoming events.')}</p>`;
+        }
+      } catch (error) {
         console.error("Error fetching events:", error);
         eventList.innerHTML = `<p class="text-sm text-error font-label">Failed to connect to server.</p>`;
-      });
+      }
+    }
+
+    connectBtn?.addEventListener('click', async () => {
+      connectBtn.disabled = true;
+      statusText.textContent = 'Preparing Google auth link...';
+      try {
+        const response = await fetch('/api/calendar/connect-url', { method: 'POST' });
+        const data = await response.json();
+        if (data.status !== 'success') {
+          throw new Error(data.message || 'Failed to create auth link.');
+        }
+
+        authLink.href = data.auth_url;
+        authLink.textContent = data.auth_url;
+        authLink.classList.remove('hidden');
+        connectPanel.classList.remove('hidden');
+        window.open(data.auth_url, '_blank', 'noopener');
+        statusText.textContent = 'Complete the Google sign-in, then paste the redirected URL below.';
+      } catch (error) {
+        statusText.textContent = error.message;
+      } finally {
+        await loadCalendarStatus();
+      }
+    });
+
+    completeBtn?.addEventListener('click', async () => {
+      const redirectResponse = redirectInput.value.trim();
+      if (!redirectResponse) {
+        statusText.textContent = 'Paste the full redirected URL first.';
+        return;
+      }
+
+      completeBtn.disabled = true;
+      statusText.textContent = 'Finalizing Google Calendar connection...';
+      try {
+        const response = await fetch('/api/calendar/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ redirect_response: redirectResponse }),
+        });
+        const data = await response.json();
+        if (data.status !== 'success') {
+          throw new Error(data.message || 'Failed to complete connection.');
+        }
+
+        connectPanel.classList.add('hidden');
+        redirectInput.value = '';
+        authLink.classList.add('hidden');
+        await loadCalendarStatus();
+        await loadEvents();
+      } catch (error) {
+        statusText.textContent = error.message;
+      } finally {
+        completeBtn.disabled = false;
+      }
+    });
+
+    cancelConnectBtn?.addEventListener('click', () => {
+      connectPanel.classList.add('hidden');
+      redirectInput.value = '';
+      authLink.classList.add('hidden');
+    });
+
+    createEventBtn?.addEventListener('click', () => toggleEventModal(true));
+    closeEventModalBtn?.addEventListener('click', () => toggleEventModal(false));
+    cancelEventCreateBtn?.addEventListener('click', () => toggleEventModal(false));
+
+    submitEventBtn?.addEventListener('click', async () => {
+      const payload = {
+        summary: eventSummaryInput.value.trim(),
+        description: eventDescriptionInput.value.trim(),
+        start_time: toSeoulIso(eventStartInput.value),
+        end_time: toSeoulIso(eventEndInput.value),
+      };
+
+      if (!payload.summary || !payload.start_time || !payload.end_time) {
+        createEventStatusText.textContent = 'Title, start time, and end time are required.';
+        return;
+      }
+
+      if (new Date(payload.end_time) <= new Date(payload.start_time)) {
+        createEventStatusText.textContent = 'End time must be after start time.';
+        return;
+      }
+
+      submitEventBtn.disabled = true;
+      createEventStatusText.textContent = 'Saving event...';
+      try {
+        const response = await fetch('/api/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json();
+        if (data.status !== 'success') {
+          throw new Error(data.message || 'Failed to create event.');
+        }
+
+        createEventStatusText.textContent = 'Event created successfully.';
+        eventSummaryInput.value = '';
+        eventDescriptionInput.value = '';
+        eventStartInput.value = '';
+        eventEndInput.value = '';
+        await loadEvents();
+        setTimeout(() => toggleEventModal(false), 500);
+      } catch (error) {
+        createEventStatusText.textContent = error.message;
+      } finally {
+        submitEventBtn.disabled = false;
+      }
+    });
+
+    loadCalendarStatus();
+    loadEvents();
   });
 </script>
 

@@ -1,6 +1,7 @@
 import os
 import shutil
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Query
@@ -10,7 +11,13 @@ from pydantic import BaseModel
 
 from .stt_tts import transcribe_audio, synthesize_speech
 from .llm import parse_command, summarize_minutes
-from .calendar_api import get_upcoming_events, add_event
+from .calendar_api import (
+    get_upcoming_events,
+    add_event,
+    get_calendar_auth_status,
+    begin_google_calendar_connect,
+    complete_google_calendar_connect,
+)
 from .database import save_minutes, update_minutes, get_latest_minutes, get_minutes_by_id
 
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -122,6 +129,54 @@ class MinutesRequest(BaseModel):
     transcript: str
     title: Optional[str] = None
     id: Optional[int] = None
+
+
+class CalendarConnectCompleteRequest(BaseModel):
+    redirect_response: str
+
+
+class CalendarEventRequest(BaseModel):
+    summary: str
+    description: Optional[str] = ""
+    start_time: str
+    end_time: str
+
+
+@app.get("/api/calendar/status")
+def calendar_status():
+    return {"status": "success", **get_calendar_auth_status()}
+
+
+@app.post("/api/calendar/connect-url")
+def calendar_connect_url():
+    try:
+        auth_url = begin_google_calendar_connect()
+        return {"status": "success", "auth_url": auth_url}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@app.post("/api/calendar/complete")
+def calendar_connect_complete(req: CalendarConnectCompleteRequest):
+    try:
+        complete_google_calendar_connect(req.redirect_response)
+        return {"status": "success", **get_calendar_auth_status()}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@app.post("/api/events")
+def create_event(req: CalendarEventRequest):
+    try:
+        start_dt = datetime.fromisoformat(req.start_time)
+        end_dt = datetime.fromisoformat(req.end_time)
+        if end_dt <= start_dt:
+            return {"status": "error", "message": "End time must be after start time."}
+
+        html_link = add_event(req.summary, req.description or "", req.start_time, req.end_time)
+        return {"status": "success", "htmlLink": html_link}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 @app.post("/api/summarize")
 def generate_minutes(req: MinutesRequest):
