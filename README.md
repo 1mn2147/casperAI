@@ -51,6 +51,10 @@ casperAI/
    ```bash
    export API_KEY="your_api_key_here"
    ```
+3. 로컬 HTTP OAuth 개발 플로우를 위해 아래 환경 변수를 설정합니다.
+   ```bash
+   export OAUTHLIB_INSECURE_TRANSPORT=1
+   ```
 
 ### 3. Docker로 실행하기 (권장)
 NVIDIA 컨테이너 툴킷이 설치된 Arch Linux 환경에서 아래 명령어를 실행합니다.
@@ -59,9 +63,23 @@ NVIDIA 컨테이너 툴킷이 설치된 Arch Linux 환경에서 아래 명령어
 cd casperAI
 docker-compose up --build
 ```
-*(참고: 초기 구동 시 `whisper-large-v3-turbo` 모델 파일이 다운로드 되므로 시간이 다소 소요될 수 있습니다. 또한, 구글 캘린더 최초 연동 시 터미널 로그의 URL을 통해 브라우저 인증을 1회 거쳐야 합니다.)*
+*(참고: 초기 구동 시 `whisper-large-v3-turbo` 모델 파일이 다운로드 되므로 시간이 다소 소요될 수 있습니다.)*
 
-### 4. 로컬 환경에서 직접 실행하기 (Docker 미사용 시)
+### 4. Google Calendar 연결 방법
+`/calendar` 페이지에서 수동 OAuth 연결 플로우를 사용합니다.
+
+1. 브라우저에서 `/calendar` 페이지로 이동합니다.
+2. `Connect` 버튼을 눌러 Google 인증 URL을 생성합니다.
+3. 새 탭에서 열린 Google 로그인 페이지에서 인증을 완료합니다.
+4. 마지막에 이동한 주소창의 전체 URL(`http://localhost/?code=...`)을 복사합니다.
+5. 다시 `/calendar` 페이지로 돌아와 URL을 붙여넣고 `Finish Connection`을 누릅니다.
+6. 연결이 완료되면 같은 페이지에서 일정 조회와 `Create New Event` 기능을 사용할 수 있습니다.
+
+주의:
+- `backend/credentials.json`이 없으면 연결이 시작되지 않습니다.
+- `OAUTHLIB_INSECURE_TRANSPORT=1`은 로컬 개발용 설정입니다. 운영 환경에서는 HTTPS 기반 OAuth로 바꿔야 합니다.
+
+### 5. 로컬 환경에서 직접 실행하기 (Docker 미사용 시)
 ```bash
 cd casperAI/backend
 python -m venv venv
@@ -71,6 +89,9 @@ source venv/bin/activate
 pip install -r requirements.txt
 # GTX 950(Maxwell 아키텍처) 등 구형 GPU를 위한 PyTorch(CUDA 11.8) 설치
 pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# 로컬 HTTP OAuth 개발 허용
+export OAUTHLIB_INSECURE_TRANSPORT=1
 
 # 모듈 테스트 (테스트 스크립트 작성 후)
 python your_test_script.py
