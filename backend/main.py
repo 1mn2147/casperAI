@@ -118,9 +118,9 @@ def get_audio_response(filename: str):
     return FileResponse(TMP_DIR / Path(filename).name)
 
 @app.get("/api/events")
-def fetch_events():
+def fetch_events(start: Optional[str] = None, end: Optional[str] = None, limit: int = Query(100, ge=1, le=250)):
     try:
-        events = get_upcoming_events()
+        events = get_upcoming_events(max_results=limit, time_min=start, time_max=end)
         return {"status": "success", "events": events}
     except Exception as e:
         return {"status": "error", "message": str(e)}

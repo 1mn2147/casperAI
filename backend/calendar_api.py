@@ -146,13 +146,19 @@ def add_event(summary: str, description: str, start_time: str, end_time: str):
     event = service.events().insert(calendarId='primary', body=event).execute()
     return event.get('htmlLink')
 
-def get_upcoming_events(max_results=10):
+def get_upcoming_events(max_results=10, time_min=None, time_max=None):
     """Fetch the upcoming events."""
     service = authenticate_google_calendar()
-    now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    events_result = service.events().list(
-        calendarId='primary', timeMin=now,
-        maxResults=max_results, singleEvents=True,
-        orderBy='startTime').execute()
+    request_args = {
+        'calendarId': 'primary',
+        'timeMin': time_min or (datetime.datetime.utcnow().isoformat() + 'Z'),
+        'maxResults': max_results,
+        'singleEvents': True,
+        'orderBy': 'startTime',
+    }
+    if time_max:
+        request_args['timeMax'] = time_max
+
+    events_result = service.events().list(**request_args).execute()
     events = events_result.get('items', [])
     return events
