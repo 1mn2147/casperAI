@@ -3,7 +3,7 @@ import shutil
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
@@ -17,6 +17,7 @@ from .calendar_api import (
     get_calendar_auth_status,
     begin_google_calendar_connect,
     complete_google_calendar_connect,
+    list_accessible_calendars,
 )
 from .database import save_minutes, update_minutes, get_latest_minutes, get_minutes_by_id
 
@@ -118,10 +119,29 @@ def get_audio_response(filename: str):
     return FileResponse(TMP_DIR / Path(filename).name)
 
 @app.get("/api/events")
-def fetch_events(start: Optional[str] = None, end: Optional[str] = None, limit: int = Query(100, ge=1, le=250)):
+def fetch_events(
+    start: Optional[str] = None,
+    end: Optional[str] = None,
+    limit: int = Query(100, ge=1, le=250),
+    calendar_ids: Optional[List[str]] = Query(default=None),
+):
     try:
-        events = get_upcoming_events(max_results=limit, time_min=start, time_max=end)
+        events = get_upcoming_events(
+            max_results=limit,
+            time_min=start,
+            time_max=end,
+            calendar_ids=calendar_ids,
+        )
         return {"status": "success", "events": events}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@app.get("/api/calendars")
+def fetch_calendars():
+    try:
+        calendars = list_accessible_calendars()
+        return {"status": "success", "calendars": calendars}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 

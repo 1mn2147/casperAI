@@ -154,6 +154,16 @@
 <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="group">group</span> 6 Participants</span>
 </div>
 </section>
+<!-- Prior Minutes -->
+<section class="col-span-12 lg:col-span-4 bg-surface-container-low p-6 rounded-xl border border-outline-variant/30 shadow-sm flex flex-col">
+<div class="flex justify-between items-center mb-4">
+<h4 class="font-headline text-xl font-bold text-on-background">Prior Minutes</h4>
+<span class="material-symbols-outlined text-primary text-sm" data-icon="history">history</span>
+</div>
+<div id="prior-minutes-list" class="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-2 max-h-[150px]">
+<p class="text-sm font-body text-on-surface-variant/50 italic">Loading...</p>
+</div>
+</section>
 <!-- Recording Player -->
 <section class="col-span-12 bg-surface-container p-6 rounded-xl border border-outline-variant/20 shadow-sm">
 <div class="flex items-center gap-6">
@@ -343,6 +353,44 @@
                     summarizeBtn.disabled = false;
                 }
             });
+        }
+
+        // Fetch Prior Minutes
+        const priorMinutesList = document.getElementById("prior-minutes-list");
+        if (priorMinutesList) {
+            try {
+                const res = await fetch('/api/minutes?limit=5');
+                if (!res.ok) throw new Error('Failed to fetch minutes');
+                const data = await res.json();
+                
+                if (data.status === "success" && data.minutes && data.minutes.length > 0) {
+                    const currentIdNum = currentId ? parseInt(currentId, 10) : null;
+                    const filtered = data.minutes.filter(m => m.id !== currentIdNum);
+                    
+                    if (filtered.length > 0) {
+                        priorMinutesList.innerHTML = '';
+                        filtered.forEach(minute => {
+                            const d = new Date(minute.created_at);
+                            const dateStr = isNaN(d.getTime()) ? "Unknown Date" : d.toLocaleDateString();
+                            const html = `
+                            <div onclick="window.location.href='/minutes?id=${minute.id}'" class="group block p-3 rounded-lg hover:bg-surface-container-highest cursor-pointer transition-all border border-transparent hover:border-outline-variant/30 bg-surface">
+                                <h5 class="text-sm font-bold text-on-surface group-hover:text-primary truncate">${minute.title || 'Untitled'}</h5>
+                                <p class="text-xs text-on-surface-variant/70 mt-1 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[10px]" data-icon="event">event</span> ${dateStr}
+                                </p>
+                            </div>`;
+                            priorMinutesList.insertAdjacentHTML('beforeend', html);
+                        });
+                    } else {
+                        priorMinutesList.innerHTML = `<p class="text-sm font-body text-on-surface-variant/50 italic">No other recent minutes.</p>`;
+                    }
+                } else {
+                    priorMinutesList.innerHTML = `<p class="text-sm font-body text-on-surface-variant/50 italic">No prior minutes found.</p>`;
+                }
+            } catch (err) {
+                console.error("Error fetching prior minutes:", err);
+                priorMinutesList.innerHTML = `<p class="text-sm font-body text-error italic">Failed to load minutes.</p>`;
+            }
         }
     });
 </script>

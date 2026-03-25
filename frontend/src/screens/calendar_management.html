@@ -195,32 +195,8 @@
 <!-- Categories -->
 <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline/5 shadow-sm">
 <h4 class="font-headline text-lg mb-6 text-primary font-bold">Categories</h4>
-<div class="space-y-4">
-<label class="flex items-center justify-between cursor-pointer group">
-<div class="flex items-center gap-3">
-<div class="w-4 h-4 rounded border-2 border-primary bg-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-[10px] text-on-primary font-bold" data-icon="check">check</span>
-</div>
-<span class="text-sm font-label text-on-surface group-hover:text-primary transition-colors">Club Meetings</span>
-</div>
-<span class="text-[10px] font-bold bg-surface-container-high px-2 py-0.5 rounded-full text-primary">12</span>
-</label>
-<label class="flex items-center justify-between cursor-pointer group">
-<div class="flex items-center gap-3">
-<div class="w-4 h-4 rounded border-2 border-secondary bg-secondary flex items-center justify-center">
-<span class="material-symbols-outlined text-[10px] text-on-primary font-bold" data-icon="check">check</span>
-</div>
-<span class="text-sm font-label text-on-surface group-hover:text-secondary transition-colors">Project Milestones</span>
-</div>
-<span class="text-[10px] font-bold bg-surface-container-high px-2 py-0.5 rounded-full text-secondary">05</span>
-</label>
-<label class="flex items-center justify-between cursor-pointer group">
-<div class="flex items-center gap-3">
-<div class="w-4 h-4 rounded border-2 border-outline/40"></div>
-<span class="text-sm font-label text-on-surface/60 group-hover:text-on-surface transition-colors">Private Focus</span>
-</div>
-<span class="text-[10px] font-bold bg-surface-container-high px-2 py-0.5 rounded-full text-on-surface/40">02</span>
-</label>
+<div id="calendarCategoriesList" class="space-y-4">
+<p class="text-sm text-on-surface-variant font-label">Loading calendars...</p>
 </div>
 </div>
 <!-- Upcoming Events Sidebar -->
@@ -327,10 +303,13 @@
     const calendarViewWeekBtn = document.getElementById("calendarViewWeekBtn");
     const calendarViewDayBtn = document.getElementById("calendarViewDayBtn");
     const viewAllEventsBtn = document.getElementById("viewAllEventsBtn");
+    const calendarCategoriesList = document.getElementById("calendarCategoriesList");
 
     let currentDate = new Date();
     let selectedDate = new Date();
     let cachedEvents = [];
+    let calendarOptions = [];
+    let selectedCalendarIds = [];
     let currentView = "month";
     let searchQuery = "";
     const calendarMonthTitle = document.getElementById("calendarMonthTitle");
@@ -386,13 +365,27 @@
       };
     }
 
-    function getFilteredEvents() {
-      const normalizedQuery = searchQuery.trim().toLowerCase();
-      if (!normalizedQuery) {
+    function getVisibleEvents() {
+      if (!calendarOptions.length) {
         return cachedEvents;
       }
 
-      return cachedEvents.filter(event => {
+      if (!selectedCalendarIds.length) {
+        return [];
+      }
+
+      const visibleIds = new Set(selectedCalendarIds);
+      return cachedEvents.filter(event => visibleIds.has(event.calendarId || 'primary'));
+    }
+
+    function getFilteredEvents() {
+      const normalizedQuery = searchQuery.trim().toLowerCase();
+      const visibleEvents = getVisibleEvents();
+      if (!normalizedQuery) {
+        return visibleEvents;
+      }
+
+      return visibleEvents.filter(event => {
         const haystack = [
           event.summary,
           event.location,
@@ -429,6 +422,65 @@
     function getColorName(index) {
       const colorNames = ['primary', 'secondary', 'tertiary'];
       return colorNames[index % colorNames.length];
+    }
+
+    function renderCalendarCategories() {
+      if (!calendarCategoriesList) return;
+
+      if (!calendarOptions.length) {
+        calendarCategoriesList.innerHTML = '<p class="text-sm text-on-surface-variant font-label">No calendars available.</p>';
+        return;
+      }
+
+      const visibleIds = new Set(selectedCalendarIds);
+      const counts = cachedEvents.reduce((acc, event) => {
+        const key = event.calendarId || 'primary';
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+
+      calendarCategoriesList.innerHTML = calendarOptions.map(calendar => {
+        const checked = visibleIds.has(calendar.id);
+        const safeSummary = escapeHtml(calendar.summary || 'Untitled Calendar');
+        const safeCount = counts[calendar.id] || 0;
+        const colorStyle = calendar.backgroundColor ? `style="background-color: ${escapeAttribute(calendar.backgroundColor)}"` : '';
+        return `
+          <label class="flex items-center justify-between cursor-pointer group">
+            <div class="flex items-center gap-3">
+              <input class="sr-only" type="checkbox" data-calendar-toggle="${escapeAttribute(calendar.id)}" ${checked ? 'checked' : ''}/>
+              <div class="w-4 h-4 rounded border-2 border-outline/30 flex items-center justify-center ${checked ? 'bg-primary border-primary' : 'bg-surface-container-lowest'}">
+                <span class="material-symbols-outlined text-[10px] ${checked ? 'text-on-primary' : 'text-transparent'} font-bold">check</span>
+              </div>
+              <div class="w-3 h-3 rounded-full" ${colorStyle}></div>
+              <span class="text-sm font-label text-on-surface transition-colors">${safeSummary}${calendar.primary ? ' (Primary)' : ''}</span>
+            </div>
+            <span class="text-[10px] font-bold bg-surface-container-high px-2 py-0.5 rounded-full text-primary">${safeCount}</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    async function loadCalendars() {
+      if (!calendarCategoriesList) return;
+
+      try {
+        const response = await fetch('/api/calendars');
+        const data = await response.json();
+        if (data.status !== 'success' || !Array.isArray(data.calendars)) {
+          throw new Error(data.message || 'Failed to load calendars.');
+        }
+
+        calendarOptions = data.calendars;
+        if (!selectedCalendarIds.length) {
+          selectedCalendarIds = calendarOptions.map(calendar => calendar.id);
+        } else {
+          const validIds = new Set(calendarOptions.map(calendar => calendar.id));
+          selectedCalendarIds = selectedCalendarIds.filter(id => validIds.has(id));
+        }
+        renderCalendarCategories();
+      } catch (error) {
+        calendarCategoriesList.innerHTML = `<p class="text-sm text-on-surface-variant font-label">${escapeHtml(error.message || 'Failed to load calendars.')}</p>`;
+      }
     }
 
     function buildEventPill(event, colorName, compact = false) {
@@ -696,8 +748,13 @@
       const filteredEvents = getFilteredEvents();
       eventList.innerHTML = "";
 
+      renderCalendarCategories();
+
       if (!filteredEvents.length) {
-        eventList.innerHTML = `<p class="text-sm text-on-surface-variant font-label">No matching upcoming events.</p>`;
+        const emptyMessage = calendarOptions.length && !selectedCalendarIds.length
+          ? 'No calendars are currently selected.'
+          : 'No matching upcoming events.';
+        eventList.innerHTML = `<p class="text-sm text-on-surface-variant font-label">${escapeHtml(emptyMessage)}</p>`;
         return;
       }
 
@@ -752,6 +809,13 @@
           if (!data.connected && !data.configured) {
             eventList.innerHTML = `<p class="text-sm text-on-surface-variant font-label">Add <code>backend/credentials.json</code> and complete Google Calendar setup to see events here.</p>`;
           }
+          if (data.connected) {
+            await loadCalendars();
+          } else if (calendarCategoriesList) {
+            calendarOptions = [];
+            selectedCalendarIds = [];
+            calendarCategoriesList.innerHTML = `<p class="text-sm text-on-surface-variant font-label">Connect Google Calendar to load calendars.</p>`;
+          }
         } else {
           statusText.textContent = data.message || 'Failed to check calendar status.';
         }
@@ -762,11 +826,21 @@
 
     async function loadEvents() {
       try {
+        if (calendarOptions.length && !selectedCalendarIds.length) {
+          cachedEvents = [];
+          renderEvents({ events: [] });
+          renderCurrentCalendar();
+          return;
+        }
+
         const range = getRangeForCurrentView();
         const params = new URLSearchParams({
           start: range.start,
           end: range.end,
           limit: '100',
+        });
+        selectedCalendarIds.forEach(calendarId => {
+          params.append('calendar_ids', calendarId);
         });
         const response = await fetch(`/api/events?${params.toString()}`);
         const data = await response.json();
@@ -821,6 +895,30 @@
       currentView = 'month';
       currentDate = new Date();
       selectedDate = new Date();
+      if (calendarOptions.length) {
+        selectedCalendarIds = calendarOptions.map(calendar => calendar.id);
+      }
+      loadEvents();
+    });
+
+    calendarCategoriesList?.addEventListener('change', event => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement) || target.type !== 'checkbox') {
+        return;
+      }
+
+      const calendarId = target.dataset.calendarToggle;
+      if (!calendarId) {
+        return;
+      }
+
+      const selectedIds = new Set(selectedCalendarIds);
+      if (target.checked) {
+        selectedIds.add(calendarId);
+      } else {
+        selectedIds.delete(calendarId);
+      }
+      selectedCalendarIds = Array.from(selectedIds);
       loadEvents();
     });
 
@@ -960,8 +1058,10 @@
       }
     });
 
-    loadCalendarStatus();
-    loadEvents();
+    (async () => {
+      await loadCalendarStatus();
+      await loadEvents();
+    })();
   });
 </script>
 

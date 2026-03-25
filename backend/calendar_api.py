@@ -125,6 +125,25 @@ def authenticate_google_calendar():
             raise RuntimeError('Google Calendar is not connected. Complete the connect flow from the calendar page first.')
     return build('calendar', 'v3', credentials=creds)
 
+
+def list_accessible_calendars():
+    service = authenticate_google_calendar()
+    calendars_result = service.calendarList().list().execute()
+    calendars = calendars_result.get('items', [])
+
+    return [
+        {
+            'id': calendar.get('id'),
+            'summary': calendar.get('summary') or 'Untitled Calendar',
+            'primary': bool(calendar.get('primary')),
+            'backgroundColor': calendar.get('backgroundColor'),
+            'foregroundColor': calendar.get('foregroundColor'),
+            'accessRole': calendar.get('accessRole'),
+        }
+        for calendar in calendars
+        if calendar.get('id')
+    ]
+
 def add_event(summary: str, description: str, start_time: str, end_time: str):
     """
     Add an event to the primary calendar.
@@ -146,19 +165,32 @@ def add_event(summary: str, description: str, start_time: str, end_time: str):
     event = service.events().insert(calendarId='primary', body=event).execute()
     return event.get('htmlLink')
 
-def get_upcoming_events(max_results=10, time_min=None, time_max=None):
+def get_upcoming_events(max_results=10, time_min=None, time_max=None, calendar_ids=None):
     """Fetch the upcoming events."""
     service = authenticate_google_calendar()
-    request_args = {
-        'calendarId': 'primary',
-        'timeMin': time_min or (datetime.datetime.utcnow().isoformat() + 'Z'),
-        'maxResults': max_results,
-        'singleEvents': True,
-        'orderBy': 'startTime',
-    }
-    if time_max:
-        request_args['timeMax'] = time_max
+    target_calendar_ids = calendar_ids or ['primary']
+    events = []
 
-    events_result = service.events().list(**request_args).execute()
-    events = events_result.get('items', [])
-    return events
+    for calendar_id in target_calendar_ids:
+        request_args = {
+            'calendarId': calendar_id,
+            'timeMin': time_min or (datetime.datetime.utcnow().isoformat() + 'Z'),
+            'maxResults': max_results,
+            'singleEvents': True,
+            'orderBy': 'startTime',
+        }
+        if time_max:
+            request_args['timeMax'] = time_max
+
+        events_result = service.events().list(**request_args).execute()
+        calendar_events = events_result.get('items', [])
+        for event in calendar_events:
+            event['calendarId'] = calendar_id
+        events.extend(calendar_events)
+
+    events.sort(
+        key=lambda event: event.get('start', {}).get('dateTime')
+        or event.get('start', {}).get('date')
+        or ''
+    )
+    return events[:max_results]
